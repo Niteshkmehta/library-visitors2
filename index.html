@@ -1,544 +1,4195 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
 <title>MANAGE Library - Smart Visitors Entry System</title>
+
+<!-- JSZip: used only for creating ZIP downloads -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f3f6f9;color:#1f2937}
-.header{background:linear-gradient(135deg,#17365d,#245b8f);color:#fff;padding:18px 26px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
-.header-inner{max-width:1500px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:20px}.brand{display:flex;align-items:center;gap:15px}
-.brand-logo{width:62px;height:62px;background:#fff;border-radius:8px;object-fit:contain;padding:3px}.brand h1{margin:0;font-size:27px}.brand p{margin:5px 0 0;color:#dbeafe;font-size:14px}
-.system-status{display:flex;align-items:center;gap:9px;padding:10px 15px;border-radius:20px;background:rgba(255,255,255,.12);font-size:14px}.status-dot{width:10px;height:10px;border-radius:50%;background:#9ca3af}.status-dot.active{background:#22c55e;box-shadow:0 0 10px rgba(34,197,94,.8)}
-.container{max-width:1500px;margin:22px auto;padding:0 18px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
-.stat-card{background:#fff;border-radius:10px;padding:15px 18px;box-shadow:0 2px 7px rgba(0,0,0,.06);border-left:4px solid #245b8f}.stat-label{color:#6b7280;font-size:12px;text-transform:uppercase;letter-spacing:.5px}.stat-value{color:#17365d;font-size:25px;font-weight:bold;margin-top:4px}
-.main-grid{display:grid;grid-template-columns:minmax(480px,1.3fr) minmax(370px,1fr) 285px;gap:18px;align-items:start}.card{background:#fff;border-radius:11px;padding:17px;box-shadow:0 2px 9px rgba(0,0,0,.07)}
-.card-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}.card-title h2{margin:0;color:#17365d;font-size:17px}.left-panel{position:sticky;top:15px}
-.setting-group{border-bottom:1px solid #e5e7eb;padding-bottom:15px;margin-bottom:15px}.setting-group:last-child{border-bottom:0;margin-bottom:0;padding-bottom:0}.setting-heading{color:#374151;font-weight:bold;font-size:13px;margin-bottom:9px}
-.setting-label{display:block;color:#6b7280;font-size:12px;margin-bottom:5px}select{width:100%;padding:8px;border:1px solid #d1d5db;border-radius:6px;background:#fff;font-size:13px}input[type=range]{width:100%}.range-value{font-size:12px;color:#245b8f;font-weight:bold;float:right}
-.camera-status-box{padding:10px;border-radius:7px;background:#f3f4f6;font-size:13px;margin-bottom:10px}.camera-status-box.online{background:#dcfce7;color:#166534}.control-buttons{display:flex;flex-direction:column;gap:8px}
-button{border:0;border-radius:6px;padding:9px 11px;font-size:12px;cursor:pointer}button:disabled{opacity:.45;cursor:not-allowed}.btn-start{background:#16a34a;color:#fff}.btn-stop{background:#dc2626;color:#fff}.btn-blue{background:#2563eb;color:#fff}.btn-gray{background:#64748b;color:#fff}.btn-danger{background:#dc2626;color:#fff}
-.detection-status{padding:9px;background:#f8fafc;border-radius:6px;font-size:12px;color:#475569;line-height:1.5}
-.camera-container{background:#050505;border-radius:9px;overflow:hidden;position:relative;aspect-ratio:16/9;width:100%}video{width:100%;height:100%;display:block;object-fit:cover;background:#000}
-.camera-overlay{position:absolute;top:12px;left:12px;right:12px;display:flex;justify-content:space-between;pointer-events:none}.camera-badge{padding:6px 10px;border-radius:15px;background:rgba(0,0,0,.65);color:#fff;font-size:11px}.camera-badge.live{background:rgba(22,163,74,.9)}
-.visitor-alert{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:none;background:rgba(22,163,74,.92);color:#fff;padding:14px 20px;border-radius:10px;font-weight:bold;font-size:17px;box-shadow:0 4px 18px rgba(0,0,0,.35);text-align:center}
-.visitor-alert.show{display:block}.live-status{margin-top:10px;padding:10px 12px;border-radius:7px;background:#f3f4f6;color:#4b5563;font-size:13px}.live-status.success{background:#dcfce7;color:#166534}.live-status.motion{background:#fef3c7;color:#92400e;font-weight:bold}.live-status.error{background:#fee2e2;color:#991b1b}
-.history-card{max-height:800px;overflow-y:auto}.history-top{position:sticky;top:-17px;z-index:5;background:#fff;padding-bottom:13px;border-bottom:1px solid #e5e7eb;margin-bottom:8px}
-.history-top h2{margin:0 0 4px;color:#17365d;font-size:18px}.history-summary{color:#6b7280;font-size:12px;margin-bottom:10px}.history-controls{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:8px}
-.history-controls select,.history-controls button{min-width:0}.report-buttons{display:grid;grid-template-columns:1fr 1fr;gap:7px}.report-buttons button{font-size:11px}
-.day-section{border-bottom:1px solid #e5e7eb;padding:14px 0}.day-header{display:flex;align-items:center;justify-content:space-between;gap:7px;margin-bottom:10px}.day-title{color:#17365d;font-size:14px;font-weight:bold}.day-count{color:#6b7280;font-size:11px;margin-top:3px}.day-actions{display:flex;gap:5px}.download-day{background:#2563eb;color:#fff;padding:6px 8px;font-size:10px}.photo-item{display:flex;align-items:center;gap:8px;padding:6px;margin-bottom:5px;border-radius:6px;background:#f8fafc}.photo-item:hover{background:#eef2f7}
-.photo-thumb{width:67px;height:46px;object-fit:cover;border-radius:4px;cursor:pointer;background:#111}.photo-info{flex:1;min-width:0}.photo-time{font-size:12px;font-weight:bold;color:#374151}.photo-type{font-size:10px;color:#9ca3af;margin-top:2px}.photo-actions{display:flex;gap:4px}.photo-download{background:#64748b;color:#fff;padding:5px 7px;font-size:10px}.photo-delete{background:#dc2626;color:#fff;padding:5px 7px;font-size:10px}
-.empty-history{text-align:center;padding:40px 10px;color:#9ca3af;font-size:13px}.latest-card{margin-top:18px}.latest-image-container{background:#111827;border-radius:8px;min-height:100px;display:flex;align-items:center;justify-content:center;overflow:hidden}#latestPhoto{max-width:100%;display:none}.no-photo{color:#9ca3af;font-size:12px}
-.modal{display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.92);align-items:center;justify-content:center;padding:25px}.viewer{width:min(1200px,96vw);height:min(90vh,850px);display:grid;grid-template-columns:70px 1fr 70px;grid-template-rows:1fr auto;gap:12px;align-items:center}
-.viewer-image-area{grid-column:2;grid-row:1;height:100%;display:flex;align-items:center;justify-content:center;min-width:0;min-height:0}.modal img{max-width:100%;max-height:100%;object-fit:contain;border-radius:7px}.viewer-arrow{width:54px;height:54px;border-radius:50%;background:rgba(255,255,255,.16);color:#fff;font-size:30px;padding:0;display:flex;align-items:center;justify-content:center}.viewer-arrow:hover{background:rgba(255,255,255,.28)}
-.viewer-prev{grid-column:1;grid-row:1}.viewer-next{grid-column:3;grid-row:1}.viewer-info{grid-column:2;grid-row:2;text-align:center;color:#fff}.viewer-counter{font-size:13px;color:#d1d5db;margin-bottom:4px}.viewer-time{font-size:15px;font-weight:bold}.viewer-type{font-size:12px;color:#cbd5e1;margin-top:3px}.viewer-download{margin-top:9px;display:inline-block;background:#2563eb;color:#fff;text-decoration:none;padding:8px 14px;border-radius:6px;font-size:12px}.close-modal{position:absolute;right:25px;top:12px;color:#fff;font-size:36px;cursor:pointer;z-index:10}
-.report-modal{display:none;position:fixed;inset:0;z-index:1100;background:rgba(0,0,0,.65);align-items:center;justify-content:center;padding:20px}.report-box{background:#fff;width:min(900px,95vw);max-height:90vh;overflow:auto;border-radius:12px;padding:20px}.report-box h2{margin-top:0;color:#17365d}.report-actions{display:flex;gap:8px;justify-content:flex-end;margin-bottom:12px}.report-table{width:100%;border-collapse:collapse;font-size:12px}.report-table th,.report-table td{border:1px solid #d1d5db;padding:7px;text-align:left}.report-table th{background:#eef2f7;color:#17365d}.report-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}.report-summary div{background:#f8fafc;padding:10px;border-radius:6px}.report-summary strong{display:block;font-size:18px;color:#17365d}.footer{text-align:center;max-width:1500px;margin:20px auto;padding:12px;color:#9ca3af;font-size:11px}
-@media(max-width:1200px){.main-grid{grid-template-columns:minmax(400px,1.2fr) minmax(320px,1fr) 260px}}@media(max-width:1000px){.main-grid{grid-template-columns:1fr}.left-panel{position:static}.history-card{max-height:none}}@media(max-width:700px){.stats{grid-template-columns:repeat(2,1fr)}.header-inner{flex-direction:column;align-items:flex-start}.viewer{grid-template-columns:50px 1fr 50px;width:100%;height:85vh}.viewer-arrow{width:44px;height:44px;font-size:25px}.report-summary{grid-template-columns:repeat(2,1fr)}}@media(max-width:500px){.stats{grid-template-columns:1fr}}
+
+/* =====================================================
+   GLOBAL
+===================================================== */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f3f6f9;
+    color: #1f2937;
+}
+
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+.header {
+    background: linear-gradient(
+        135deg,
+        #17365d,
+        #245b8f
+    );
+
+    color: white;
+    padding: 20px 28px;
+
+    box-shadow:
+        0 2px 8px rgba(0,0,0,0.15);
+}
+
+.header-inner {
+
+    max-width: 1500px;
+    margin: auto;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 20px;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.brand-icon {
+
+    width: 52px;
+    height: 52px;
+
+    border-radius: 12px;
+
+    background:
+        rgba(255,255,255,0.15);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 27px;
+}
+
+.brand h1 {
+
+    margin: 0;
+
+    font-size: 27px;
+
+    letter-spacing: 0.3px;
+}
+
+.brand p {
+
+    margin: 5px 0 0;
+
+    color: #dbeafe;
+
+    font-size: 14px;
+}
+
+.system-status {
+
+    display: flex;
+    align-items: center;
+
+    gap: 9px;
+
+    padding: 10px 15px;
+
+    border-radius: 20px;
+
+    background:
+        rgba(255,255,255,0.12);
+
+    font-size: 14px;
+}
+
+.status-dot {
+
+    width: 10px;
+    height: 10px;
+
+    border-radius: 50%;
+
+    background: #9ca3af;
+}
+
+.status-dot.active {
+
+    background: #22c55e;
+
+    box-shadow:
+        0 0 10px rgba(34,197,94,0.8);
+}
+
+
+/* =====================================================
+   MAIN
+===================================================== */
+
+.container {
+
+    max-width: 1500px;
+
+    margin: 22px auto;
+
+    padding: 0 18px;
+}
+
+
+/* =====================================================
+   TOP STATISTICS
+===================================================== */
+
+.stats {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
+    gap: 14px;
+
+    margin-bottom: 18px;
+}
+
+.stat-card {
+
+    background: white;
+
+    border-radius: 10px;
+
+    padding: 15px 18px;
+
+    box-shadow:
+        0 2px 7px rgba(0,0,0,0.06);
+
+    border-left:
+        4px solid #245b8f;
+}
+
+.stat-label {
+
+    color: #6b7280;
+
+    font-size: 12px;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.5px;
+}
+
+.stat-value {
+
+    color: #17365d;
+
+    font-size: 25px;
+
+    font-weight: bold;
+
+    margin-top: 4px;
+}
+
+
+/* =====================================================
+   THREE COLUMN LAYOUT
+===================================================== */
+
+.main-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        260px
+        minmax(450px, 1fr)
+        390px;
+
+    gap: 18px;
+
+    align-items: start;
+}
+
+
+/* =====================================================
+   CARD
+===================================================== */
+
+.card {
+
+    background: white;
+
+    border-radius: 11px;
+
+    padding: 17px;
+
+    box-shadow:
+        0 2px 9px rgba(0,0,0,0.07);
+}
+
+.card-title {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    margin-bottom: 14px;
+}
+
+.card-title h2 {
+
+    margin: 0;
+
+    color: #17365d;
+
+    font-size: 17px;
+}
+
+
+/* =====================================================
+   LEFT SETTINGS
+===================================================== */
+
+.left-panel {
+
+    position: sticky;
+
+    top: 15px;
+}
+
+.setting-group {
+
+    border-bottom:
+        1px solid #e5e7eb;
+
+    padding-bottom: 15px;
+
+    margin-bottom: 15px;
+}
+
+.setting-group:last-child {
+
+    border-bottom: none;
+
+    margin-bottom: 0;
+
+    padding-bottom: 0;
+}
+
+.setting-heading {
+
+    color: #374151;
+
+    font-weight: bold;
+
+    font-size: 13px;
+
+    margin-bottom: 9px;
+}
+
+.setting-label {
+
+    display: block;
+
+    color: #6b7280;
+
+    font-size: 12px;
+
+    margin-bottom: 5px;
+}
+
+select {
+
+    width: 100%;
+
+    padding: 8px;
+
+    border:
+        1px solid #d1d5db;
+
+    border-radius: 6px;
+
+    background: white;
+
+    font-size: 13px;
+}
+
+input[type="range"] {
+
+    width: 100%;
+}
+
+.range-value {
+
+    font-size: 12px;
+
+    color: #245b8f;
+
+    font-weight: bold;
+
+    float: right;
+}
+
+
+/* CAMERA STATUS */
+
+.camera-status-box {
+
+    padding: 10px;
+
+    border-radius: 7px;
+
+    background: #f3f4f6;
+
+    font-size: 13px;
+
+    margin-bottom: 10px;
+}
+
+.camera-status-box.online {
+
+    background: #dcfce7;
+
+    color: #166534;
+}
+
+.camera-status-box.offline {
+
+    background: #f3f4f6;
+
+    color: #6b7280;
+}
+
+
+/* LEFT BUTTONS */
+
+.control-buttons {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 8px;
+}
+
+button {
+
+    border: none;
+
+    border-radius: 6px;
+
+    padding: 10px 13px;
+
+    font-size: 13px;
+
+    cursor: pointer;
+}
+
+button:disabled {
+
+    opacity: 0.5;
+
+    cursor: not-allowed;
+}
+
+.btn-start {
+
+    background: #16a34a;
+
+    color: white;
+}
+
+.btn-stop {
+
+    background: #dc2626;
+
+    color: white;
+}
+
+.btn-blue {
+
+    background: #2563eb;
+
+    color: white;
+}
+
+.btn-gray {
+
+    background: #64748b;
+
+    color: white;
+}
+
+
+/* DETECTION STATUS */
+
+.detection-status {
+
+    padding: 9px;
+
+    background: #f8fafc;
+
+    border-radius: 6px;
+
+    font-size: 12px;
+
+    color: #475569;
+
+    line-height: 1.5;
+}
+
+
+/* =====================================================
+   MIDDLE LIVE CAMERA
+===================================================== */
+
+.live-panel {
+
+    min-width: 0;
+}
+
+.camera-container {
+
+    background: #050505;
+
+    border-radius: 9px;
+
+    overflow: hidden;
+
+    position: relative;
+
+    aspect-ratio: 16 / 9;
+
+    width: 100%;
+}
+
+video {
+
+    width: 100%;
+
+    height: 100%;
+
+    display: block;
+
+    object-fit: cover;
+
+    background: black;
+}
+
+.camera-overlay {
+
+    position: absolute;
+
+    top: 12px;
+
+    left: 12px;
+
+    right: 12px;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    pointer-events: none;
+}
+
+.camera-badge {
+
+    padding: 6px 10px;
+
+    border-radius: 15px;
+
+    background:
+        rgba(0,0,0,0.65);
+
+    color: white;
+
+    font-size: 11px;
+}
+
+.camera-badge.live {
+
+    background:
+        rgba(22,163,74,0.9);
+}
+
+
+/* MIDDLE STATUS */
+
+.live-status {
+
+    margin-top: 10px;
+
+    padding: 10px 12px;
+
+    border-radius: 7px;
+
+    background: #f3f4f6;
+
+    color: #4b5563;
+
+    font-size: 13px;
+}
+
+.live-status.success {
+
+    background: #dcfce7;
+
+    color: #166534;
+}
+
+.live-status.motion {
+
+    background: #fef3c7;
+
+    color: #92400e;
+
+    font-weight: bold;
+}
+
+.live-status.error {
+
+    background: #fee2e2;
+
+    color: #991b1b;
+}
+
+
+/* =====================================================
+   RIGHT PHOTO HISTORY
+===================================================== */
+
+.history-card {
+
+    max-height: 780px;
+
+    overflow-y: auto;
+}
+
+.history-top {
+
+    position: sticky;
+
+    top: -17px;
+
+    z-index: 5;
+
+    background: white;
+
+    padding-bottom: 13px;
+
+    border-bottom:
+        1px solid #e5e7eb;
+
+    margin-bottom: 8px;
+}
+
+.history-top h2 {
+
+    margin: 0 0 4px;
+
+    color: #17365d;
+
+    font-size: 18px;
+}
+
+.history-summary {
+
+    color: #6b7280;
+
+    font-size: 12px;
+
+    margin-bottom: 10px;
+}
+
+.day-section {
+
+    border-bottom:
+        1px solid #e5e7eb;
+
+    padding: 14px 0;
+}
+
+.day-header {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 7px;
+
+    margin-bottom: 10px;
+}
+
+.day-title {
+
+    color: #17365d;
+
+    font-size: 14px;
+
+    font-weight: bold;
+}
+
+.day-count {
+
+    color: #6b7280;
+
+    font-size: 11px;
+
+    margin-top: 3px;
+}
+
+.download-day {
+
+    background: #2563eb;
+
+    color: white;
+
+    padding: 6px 8px;
+
+    font-size: 10px;
+}
+
+
+/* PHOTO ITEM */
+
+.photo-item {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 6px;
+
+    margin-bottom: 5px;
+
+    border-radius: 6px;
+
+    background: #f8fafc;
+}
+
+.photo-item:hover {
+
+    background: #eef2f7;
+}
+
+.photo-thumb {
+
+    width: 67px;
+
+    height: 46px;
+
+    object-fit: cover;
+
+    border-radius: 4px;
+
+    cursor: pointer;
+
+    background: #111;
+}
+
+.photo-info {
+
+    flex: 1;
+
+    min-width: 0;
+}
+
+.photo-time {
+
+    font-size: 12px;
+
+    font-weight: bold;
+
+    color: #374151;
+}
+
+.photo-type {
+
+    font-size: 10px;
+
+    color: #9ca3af;
+
+    margin-top: 2px;
+}
+
+.photo-download {
+
+    background: #64748b;
+
+    color: white;
+
+    padding: 5px 7px;
+
+    font-size: 10px;
+}
+
+
+/* EMPTY */
+
+.empty-history {
+
+    text-align: center;
+
+    padding: 40px 10px;
+
+    color: #9ca3af;
+
+    font-size: 13px;
+}
+
+
+/* =====================================================
+   LATEST PHOTO
+===================================================== */
+
+.latest-card {
+
+    margin-top: 18px;
+}
+
+.latest-image-container {
+
+    background: #111827;
+
+    border-radius: 8px;
+
+    min-height: 100px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    overflow: hidden;
+}
+
+#latestPhoto {
+
+    max-width: 100%;
+
+    display: none;
+}
+
+.no-photo {
+
+    color: #9ca3af;
+
+    font-size: 12px;
+}
+
+
+/* =====================================================
+   MODAL
+===================================================== */
+
+.modal {
+
+    display: none;
+
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 1000;
+
+    background:
+        rgba(0,0,0,0.88);
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 20px;
+}
+
+.photo-viewer {
+    width: min(1200px, 96vw);
+    height: min(90vh, 850px);
+    display: grid;
+    grid-template-columns: 60px 1fr 60px;
+    grid-template-rows: 1fr auto;
+    gap: 12px;
+    align-items: center;
+}
+
+.photo-viewer-image-area {
+    grid-column: 2;
+    grid-row: 1;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 7px;
+}
+
+.viewer-arrow {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.16);
+    color: white;
+    font-size: 30px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.viewer-arrow:hover {
+    background: rgba(255,255,255,0.30);
+}
+
+.viewer-arrow:disabled {
+    opacity: 0.25;
+}
+
+.viewer-prev { grid-column: 1; grid-row: 1; }
+.viewer-next { grid-column: 3; grid-row: 1; }
+
+.viewer-info {
+    grid-column: 2;
+    grid-row: 2;
+    text-align: center;
+    color: white;
+}
+
+.viewer-counter {
+    font-size: 12px;
+    color: #d1d5db;
+    margin-bottom: 4px;
+}
+
+.viewer-time {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.viewer-type {
+    font-size: 11px;
+    color: #cbd5e1;
+    margin-top: 3px;
+}
+
+.viewer-download {
+    display: inline-block;
+    margin-top: 8px;
+    background: #2563eb;
+    color: white;
+    text-decoration: none;
+    padding: 7px 12px;
+    border-radius: 6px;
+    font-size: 11px;
+}
+
+.close-modal {
+    position: absolute;
+    right: 25px;
+    top: 12px;
+    color: white;
+    font-size: 36px;
+    cursor: pointer;
+    z-index: 5;
+}
+
+@media (max-width: 700px) {
+    .photo-viewer {
+        grid-template-columns: 48px 1fr 48px;
+        width: 100%;
+        height: 85vh;
+    }
+    .viewer-arrow {
+        width: 42px;
+        height: 42px;
+        font-size: 24px;
+    }
+}
+
+
+/* =====================================================
+   FOOTER
+===================================================== */
+
+.footer {
+
+    text-align: center;
+
+    max-width: 1500px;
+
+    margin: 20px auto;
+
+    padding: 12px;
+
+    color: #9ca3af;
+
+    font-size: 11px;
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 1200px) {
+
+    .main-grid {
+
+        grid-template-columns:
+            230px
+            minmax(400px, 1fr)
+            350px;
+
+    }
+
+}
+
+@media (max-width: 1000px) {
+
+    .main-grid {
+
+        grid-template-columns: 1fr;
+
+    }
+
+    .left-panel {
+
+        position: static;
+
+    }
+
+    .history-card {
+
+        max-height: none;
+
+    }
+
+}
+
+@media (max-width: 700px) {
+
+    .stats {
+
+        grid-template-columns:
+            repeat(2, 1fr);
+
+    }
+
+    .header-inner {
+
+        flex-direction: column;
+
+        align-items: flex-start;
+
+    }
+
+}
+
+@media (max-width: 500px) {
+
+    .stats {
+
+        grid-template-columns: 1fr;
+
+    }
+
+}
+
 </style>
+
 </head>
+
+
 <body>
 
+
+<!-- =====================================================
+     HEADER
+===================================================== -->
+
 <header class="header">
+
 <div class="header-inner">
+
 <div class="brand">
-<img class="brand-logo" src="https://upload.wikimedia.org/wikipedia/en/2/21/National_Institute_of_Agricultural_Extension_Management_logo.png" crossorigin="anonymous" alt="MANAGE Logo">
-<div><h1>MANAGE LIBRARY</h1><p>Smart Visitors Entry System</p></div>
+
+<div class="brand-icon">
+📚
 </div>
-<div class="system-status"><span id="statusDot" class="status-dot"></span><span id="systemStatusText">Camera Off</span></div>
+
+<div>
+
+<h1>
+MANAGE LIBRARY
+</h1>
+
+<p>
+Smart Visitors Entry System
+</p>
+
 </div>
+
+</div>
+
+
+<div class="system-status">
+
+<span
+id="statusDot"
+class="status-dot">
+</span>
+
+<span
+id="systemStatusText">
+
+Camera Off
+
+</span>
+
+</div>
+
+</div>
+
 </header>
+
+
 
 <div class="container">
 
-<div class="stats">
-<div class="stat-card"><div class="stat-label">Camera</div><div id="cameraStat" class="stat-value">OFF</div></div>
-<div class="stat-card"><div class="stat-label">Detected Records</div><div id="visitorCount" class="stat-value">0</div></div>
-<div class="stat-card"><div class="stat-label">Today's Visitors</div><div id="todayCount" class="stat-value">0</div></div>
 
-<div class="stat-card"><div class="stat-label">Storage Used</div><div id="storageStat" class="stat-value" style="font-size:19px">0 MB</div></div>
+<!-- =====================================================
+     STATISTICS
+===================================================== -->
+
+<div class="stats">
+
+
+<div class="stat-card">
+
+<div class="stat-label">
+Camera
 </div>
+
+<div
+id="cameraStat"
+class="stat-value">
+
+OFF
+
+</div>
+
+</div>
+
+
+<div class="stat-card">
+
+<div class="stat-label">
+Detected Events
+</div>
+
+<div
+id="motionCount"
+class="stat-value">
+
+0
+
+</div>
+
+</div>
+
+
+<div class="stat-card">
+
+<div class="stat-label">
+Today's Photos
+</div>
+
+<div
+id="todayCount"
+class="stat-value">
+
+0
+
+</div>
+
+</div>
+
+
+<div class="stat-card">
+
+<div class="stat-label">
+Stored Photos
+</div>
+
+<div
+id="photoCount"
+class="stat-value">
+
+0
+
+</div>
+
+</div>
+
+
+</div>
+
+
+
+<!-- =====================================================
+     THREE COLUMN AREA
+===================================================== -->
 
 <div class="main-grid">
 
-<!-- LEFT: LIVE CAMERA -->
-<div class="card live-panel">
-<div class="card-title"><h2>🎥 Live Camera Feed</h2></div>
-<div class="camera-container">
-<video id="camera" autoplay playsinline muted></video>
-<div class="camera-overlay">
-<span id="cameraBadge" class="camera-badge">CAMERA OFF</span>
-<span class="camera-badge">VISITOR DETECTION</span>
-</div>
-<div id="visitorAlert" class="visitor-alert">👤 VISITOR DETECTED<br><small>Capturing clear photograph...</small></div>
-</div>
-<div id="status" class="live-status">Camera is stopped.</div>
-</div>
 
-<!-- MIDDLE: VISITOR HISTORY -->
-<div class="card history-card">
-<div class="history-top">
-<h2>👤 Detected Visitors</h2>
-<div id="historySummary" class="history-summary">Loading visitor records...</div>
+<!-- ===================================================
+     LEFT — SETTINGS
+=================================================== -->
 
-<div class="history-controls">
-<select id="dateFilter"><option value="all">All Dates</option></select>
-<select id="monthFilter"><option value="all">All Months</option></select>
-</div>
-
-<div class="report-buttons">
-<button id="dailyReportButton" class="btn-blue">📊 Daily Report</button>
-<button id="monthlyReportButton" class="btn-blue">📊 Monthly Report</button>
-</div>
-
-<br>
-<button id="downloadAllButton" class="btn-blue" style="width:100%;">⬇ Download All Visitor Records</button>
-</div>
-<div id="history"><div class="empty-history">No visitors detected yet.</div></div>
-</div>
-
-<!-- RIGHT: SETTINGS -->
 <div class="card left-panel">
-<div class="card-title"><h2>⚙ Settings</h2></div>
+
+
+<div class="card-title">
+
+<h2>
+⚙ Camera & Detection
+</h2>
+
+</div>
+
+
+
+<!-- CAMERA -->
 
 <div class="setting-group">
-<div class="setting-heading">Camera</div>
-<div id="cameraStatusBox" class="camera-status-box">⚪ Camera Offline</div>
+
+<div class="setting-heading">
+Camera
+</div>
+
+
+<div
+id="cameraStatusBox"
+class="camera-status-box offline">
+
+⚪ Camera Offline
+
+</div>
+
+
 <div class="control-buttons">
-<button id="startButton" class="btn-start">▶ Start Monitoring</button>
-<button id="stopButton" class="btn-stop" disabled>■ Stop Monitoring</button>
-</div>
+
+<button
+id="startButton"
+class="btn-start">
+
+▶ Start Monitoring
+
+</button>
+
+
+<button
+id="stopButton"
+class="btn-stop"
+disabled>
+
+■ Stop Monitoring
+
+</button>
+
 </div>
 
+</div>
+
+
+
+<!-- MOTION -->
+
 <div class="setting-group">
-<div class="setting-heading">Visitor Detection</div>
-<label class="setting-label">Sensitivity</label>
-<select id="sensitivity"><option value="low">Low</option><option value="medium">Medium</option><option value="high" selected>High</option></select>
+
+<div class="setting-heading">
+Motion Detection
+</div>
+
+
+<label class="setting-label">
+Sensitivity
+</label>
+
+
+<select id="sensitivity">
+
+<option value="low">
+Low
+</option>
+
+<option value="medium">
+Medium
+</option>
+
+<option value="high"
+selected>
+High
+</option>
+
+</select>
+
+
 <br><br>
-<label class="setting-label">Event Cooldown <span id="cooldownValue" class="range-value">5 sec</span></label>
-<input id="cooldown" type="range" min="2" max="60" value="5">
+
+
+<label class="setting-label">
+
+Cooldown
+
+<span
+id="cooldownValue"
+class="range-value">
+
+5 sec
+
+</span>
+
+</label>
+
+
+<input
+id="cooldown"
+type="range"
+min="2"
+max="60"
+value="5">
+
+</div>
+
+
+
+<!-- PHOTO -->
+
+<div class="setting-group">
+
+<div class="setting-heading">
+Photo Settings
+</div>
+
+
+<label class="setting-label">
+Photo Quality
+</label>
+
+
+<select id="photoQuality">
+
+<option value="verylow">
+Very Low — 320×180
+</option>
+
+<option value="low"
+selected>
+Low — 480×270
+</option>
+
+<option value="medium">
+Medium — 640×360
+</option>
+
+<option value="high">
+High — 1280×720
+</option>
+
+</select>
+
+
 <br><br>
 
+
+<div
+id="qualityInfo"
+class="detection-status">
+
+480 × 270 pixels<br>
+JPEG quality: 40%
+
 </div>
 
-<div class="setting-group">
-<div class="setting-heading">Photo Settings</div>
-<label class="setting-label">Capture Quality</label>
-<select id="photoQuality"><option value="medium">Medium — 640×360 / 50%</option><option value="high" selected>High — 1280×720 / 70%</option></select>
-<br><br><div id="qualityInfo" class="detection-status">1280 × 720 pixels<br>JPEG quality: 70%</div>
 </div>
 
+
+
+<!-- DETECTION INFO -->
+
 <div class="setting-group">
-<div class="setting-heading">Storage & Statistics</div>
+
+<div class="setting-heading">
+System Information
+</div>
+
+
 <div class="detection-status">
-<strong>Detected Records:</strong> <span id="leftVisitorCount">0</span><br><br>
 
-<strong>Today's Visitors:</strong> <span id="leftTodayCount">0</span><br><br>
-<strong>Storage Used:</strong> <span id="leftStorage">0 MB</span><br><br>
-<strong>Detection:</strong> Multi-frame<br><br>
-<strong>Capture:</strong> Best frame + MANAGE logo
-</div>
+<strong>Detected Events:</strong>
+
+<span
+id="leftMotionCount">
+
+0
+</span>
+
+<br><br>
+
+<strong>Today's Photos:</strong>
+
+<span
+id="leftTodayCount">
+
+0
+</span>
+
+<br><br>
+
+<strong>Total Stored:</strong>
+
+<span
+id="leftPhotoCount">
+
+0
+</span>
+
 </div>
 
-<div class="setting-group">
-<div class="setting-heading">Camera Recovery</div>
-<div class="detection-status">Automatic camera reconnection is enabled if the video stream stops unexpectedly.</div>
-</div>
 </div>
 
 </div>
+
+
+
+<!-- ===================================================
+     MIDDLE — LIVE CAMERA ONLY
+=================================================== -->
+
+<div class="card live-panel">
+
+
+<div class="card-title">
+
+<h2>
+🎥 Live Camera Feed
+</h2>
+
+</div>
+
+
+<div class="camera-container">
+
+<video
+id="camera"
+autoplay
+playsinline
+muted>
+</video>
+
+
+<div class="camera-overlay">
+
+<span
+id="cameraBadge"
+class="camera-badge">
+
+CAMERA OFF
+
+</span>
+
+
+<span
+class="camera-badge">
+
+MOTION DETECTION
+
+</span>
+
+</div>
+
+</div>
+
+
+<div
+id="status"
+class="live-status">
+
+Camera is stopped.
+
+</div>
+
+
+</div>
+
+
+
+<!-- ===================================================
+     RIGHT — PHOTO HISTORY
+=================================================== -->
+
+<div
+class="card history-card">
+
+
+<div class="history-top">
+
+<h2>
+📸 Photo History
+</h2>
+
+
+<div
+id="historySummary"
+class="history-summary">
+
+Loading history...
+
+</div>
+
+
+<button
+id="downloadAllButton"
+class="btn-blue"
+style="width:100%;">
+
+⬇ Download All Photos
+
+</button>
+
+</div>
+
+
+<div
+id="history">
+
+<div class="empty-history">
+
+No photographs captured yet.
+
+</div>
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+<!-- =====================================================
+     LATEST PHOTO
+===================================================== -->
 
 <div class="card latest-card">
-<div class="card-title"><h2>📸 Latest Visitor Capture</h2></div>
-<div class="latest-image-container"><img id="latestPhoto" alt="Latest visitor capture"><div id="noPhoto" class="no-photo">No visitor captured yet.</div></div>
-<div style="margin-top:10px;"><a id="downloadLatest" class="btn-blue" style="display:none;text-decoration:none;padding:8px 12px;border-radius:6px;font-size:12px;">⬇ Download Latest Photo</a></div>
-</div>
+
+
+<div class="card-title">
+
+<h2>
+📸 Latest Captured Photo
+</h2>
+
 </div>
 
-<!-- PHOTO VIEWER -->
-<div id="photoModal" class="modal">
-<span id="closeModal" class="close-modal">&times;</span>
-<div class="viewer">
-<button id="previousPhoto" class="viewer-arrow viewer-prev">‹</button>
-<div class="viewer-image-area"><img id="modalImage" alt="Visitor photograph"></div>
-<button id="nextPhoto" class="viewer-arrow viewer-next">›</button>
+
+<div class="latest-image-container">
+
+<img
+id="latestPhoto"
+alt="Latest captured photo">
+
+
+<div
+id="noPhoto"
+class="no-photo">
+
+No photograph captured yet.
+
+</div>
+
+</div>
+
+
+<div
+style="
+margin-top:10px;
+">
+
+<a
+id="downloadLatest"
+class="btn-blue"
+style="
+display:none;
+text-decoration:none;
+padding:8px 12px;
+border-radius:6px;
+font-size:12px;
+">
+
+⬇ Download Latest Photo
+
+</a>
+
+</div>
+
+</div>
+
+
+</div>
+
+
+
+<!-- =====================================================
+     PHOTO VIEWER
+===================================================== -->
+
+<div
+id="photoModal"
+class="modal">
+
+<span
+id="closeModal"
+class="close-modal">
+
+&times;
+
+</span>
+
+<div class="photo-viewer">
+
+<button
+id="previousPhoto"
+class="viewer-arrow viewer-prev"
+title="Previous photo">‹</button>
+
+<div class="photo-viewer-image-area">
+
+<img
+id="modalImage"
+alt="Photo preview">
+
+</div>
+
+<button
+id="nextPhoto"
+class="viewer-arrow viewer-next"
+title="Next photo">›</button>
+
 <div class="viewer-info">
+
 <div id="viewerCounter" class="viewer-counter">1 / 1</div>
+
 <div id="viewerTime" class="viewer-time"></div>
-<div class="viewer-type">👤 Visitor detected</div>
+
+<div class="viewer-type">Motion detected</div>
+
 <a id="viewerDownload" class="viewer-download">⬇ Download Photo</a>
-</div>
-</div>
+
 </div>
 
-<!-- REPORT MODAL -->
-<div id="reportModal" class="report-modal">
-<div class="report-box">
-<div class="report-actions">
-<button id="downloadReportCSV" class="btn-blue">⬇ CSV</button>
-<button id="downloadReportPDF" class="btn-blue">⬇ Print / PDF</button>
-<button id="closeReport" class="btn-gray">Close</button>
-</div>
-<div id="reportContent"></div>
-</div>
 </div>
 
-<div class="footer"><strong>MANAGE LIBRARY</strong> &nbsp;|&nbsp; Smart Visitors Entry System &nbsp;|&nbsp; Visitor photographs stored locally in this browser</div>
+</div>
+
+
+
+<div class="footer">
+
+<strong>
+MANAGE LIBRARY
+</strong>
+
+&nbsp;|&nbsp;
+
+Smart Visitors Entry System
+
+&nbsp;|&nbsp;
+
+Photos stored locally in this browser
+
+</div>
+
+
 
 <script>
-const DB_NAME="manageLibraryVisitorsDB",DB_VERSION=1,STORE_NAME="photos";
-const LOGO_URL="https://upload.wikimedia.org/wikipedia/en/2/21/National_Institute_of_Agricultural_Extension_Management_logo.png";
-const REAL_LOGO_URL="https://upload.wikimedia.org/wikipedia/en/2/21/National_Institute_of_Agricultural_Extension_Management_logo.png";
-let db=null,viewerPhotos=[],viewerIndex=0,viewerObjectUrls=[],currentReport=null;
 
-function openDatabase(){return new Promise((resolve,reject)=>{const r=indexedDB.open(DB_NAME,DB_VERSION);r.onupgradeneeded=e=>{const d=e.target.result;if(!d.objectStoreNames.contains(STORE_NAME)){const s=d.createObjectStore(STORE_NAME,{keyPath:"id",autoIncrement:true});s.createIndex("date","date");s.createIndex("timestamp","timestamp")}};r.onsuccess=e=>{db=e.target.result;resolve(db)};r.onerror=()=>reject(r.error)})}
-function savePhotoToDatabase(blob,date,time,timestamp){return new Promise((resolve,reject)=>{const tx=db.transaction(STORE_NAME,"readwrite"),r=tx.objectStore(STORE_NAME).add({blob,date,time,timestamp,type:"Visitor detected"});r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})}
-function getAllPhotos(){return new Promise((resolve,reject)=>{const r=db.transaction(STORE_NAME,"readonly").objectStore(STORE_NAME).getAll();r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})}
-function deletePhoto(id){return new Promise((resolve,reject)=>{const r=db.transaction(STORE_NAME,"readwrite").objectStore(STORE_NAME).delete(id);r.onsuccess=()=>resolve();r.onerror=()=>reject(r.error)})}
-function getDateKey(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
-function displayDate(s){const p=s.split("-");return new Date(+p[0],+p[1]-1,+p[2]).toLocaleDateString(undefined,{day:"numeric",month:"long",year:"numeric"})}
-const ESTIMATION_FACTOR = 50;
-function estimateVisitors(n){return Math.round(n*(ESTIMATION_FACTOR/100))}
-function formatMB(bytes){return (bytes/1024/1024).toFixed(2)+" MB"}
 
-async function storageUsed(){
- const photos=await getAllPhotos();let bytes=0;photos.forEach(p=>bytes+=p.blob?.size||0);return bytes
+/* =====================================================
+   DATABASE
+===================================================== */
+
+const DB_NAME =
+"manageLibraryVisitorsDB";
+
+const DB_VERSION =
+1;
+
+const STORE_NAME =
+"photos";
+
+let db = null;
+
+
+
+/* =====================================================
+   OPEN DATABASE
+===================================================== */
+
+function openDatabase() {
+
+    return new Promise(
+        (resolve, reject) => {
+
+            const request =
+                indexedDB.open(
+                    DB_NAME,
+                    DB_VERSION
+                );
+
+
+            request.onupgradeneeded =
+                function(event) {
+
+                    const database =
+                        event.target.result;
+
+
+                    if (
+                        !database.objectStoreNames
+                            .contains(STORE_NAME)
+                    ) {
+
+                        const store =
+                            database.createObjectStore(
+                                STORE_NAME,
+                                {
+                                    keyPath: "id",
+                                    autoIncrement: true
+                                }
+                            );
+
+
+                        store.createIndex(
+                            "date",
+                            "date",
+                            {
+                                unique: false
+                            }
+                        );
+
+
+                        store.createIndex(
+                            "timestamp",
+                            "timestamp",
+                            {
+                                unique: false
+                            }
+                        );
+
+                    }
+
+                };
+
+
+            request.onsuccess =
+                function(event) {
+
+                    db =
+                        event.target.result;
+
+                    resolve(db);
+
+                };
+
+
+            request.onerror =
+                function() {
+
+                    reject(
+                        request.error
+                    );
+
+                };
+
+        }
+    );
+
 }
 
-async function updateStats(){
- const photos=await getAllPhotos(),today=getDateKey(new Date()),todayRecords=photos.filter(p=>p.date===today).length,estimated=estimateVisitors(todayRecords),allEstimated=estimateVisitors(photos.length),used=await storageUsed();
- document.getElementById("visitorCount").textContent=photos.length;
- document.getElementById("todayCount").textContent=estimated;
- 
- document.getElementById("storageStat").textContent=formatMB(used);
- document.getElementById("leftVisitorCount").textContent=photos.length;
- 
- document.getElementById("leftTodayCount").textContent=estimated;
- document.getElementById("leftStorage").textContent=formatMB(used);
+
+
+/* =====================================================
+   SAVE PHOTO
+===================================================== */
+
+function savePhotoToDatabase(
+    blob,
+    date,
+    time,
+    timestamp
+) {
+
+    return new Promise(
+        (resolve, reject) => {
+
+            const transaction =
+                db.transaction(
+                    STORE_NAME,
+                    "readwrite"
+                );
+
+
+            const store =
+                transaction.objectStore(
+                    STORE_NAME
+                );
+
+
+            const photo = {
+
+                blob: blob,
+
+                date: date,
+
+                time: time,
+
+                timestamp: timestamp,
+
+                type:
+                    "Motion detected"
+
+            };
+
+
+            const request =
+                store.add(photo);
+
+
+            request.onsuccess =
+                function() {
+
+                    resolve(
+                        request.result
+                    );
+
+                };
+
+
+            request.onerror =
+                function() {
+
+                    reject(
+                        request.error
+                    );
+
+                };
+
+        }
+    );
+
 }
 
-function buildFilters(photos){
- const dates=[...new Set(photos.map(p=>p.date))].sort((a,b)=>b.localeCompare(a));
- const months=[...new Set(photos.map(p=>p.date.slice(0,7)))].sort((a,b)=>b.localeCompare(a));
- const df=document.getElementById("dateFilter"),mf=document.getElementById("monthFilter"),oldD=df.value,oldM=mf.value;
- df.innerHTML='<option value="all">All Dates</option>'+dates.map(d=>`<option value="${d}">${displayDate(d)}</option>`).join("");
- mf.innerHTML='<option value="all">All Months</option>'+months.map(m=>`<option value="${m}">${new Date(+m.slice(0,4),+m.slice(5)-1,1).toLocaleDateString(undefined,{month:"long",year:"numeric"})}</option>`).join("");
- if(dates.includes(oldD))df.value=oldD;if(months.includes(oldM))mf.value=oldM;
+
+
+/* =====================================================
+   GET ALL PHOTOS
+===================================================== */
+
+function getAllPhotos() {
+
+    return new Promise(
+        (resolve, reject) => {
+
+            const transaction =
+                db.transaction(
+                    STORE_NAME,
+                    "readonly"
+                );
+
+
+            const store =
+                transaction.objectStore(
+                    STORE_NAME
+                );
+
+
+            const request =
+                store.getAll();
+
+
+            request.onsuccess =
+                function() {
+
+                    resolve(
+                        request.result
+                    );
+
+                };
+
+
+            request.onerror =
+                function() {
+
+                    reject(
+                        request.error
+                    );
+
+                };
+
+        }
+    );
+
 }
 
-async function renderHistory(){
- const all=await getAllPhotos();all.sort((a,b)=>b.timestamp-a.timestamp);buildFilters(all);
- const date=document.getElementById("dateFilter").value,month=document.getElementById("monthFilter").value;
- let photos=all;if(date!=="all")photos=photos.filter(p=>p.date===date);else if(month!=="all")photos=photos.filter(p=>p.date.startsWith(month));
- document.getElementById("historySummary").textContent=photos.length+" detected record"+(photos.length===1?"":"s");
- const history=document.getElementById("history");history.innerHTML="";
- if(!photos.length){history.innerHTML='<div class="empty-history">No visitor records for this selection.</div>';await updateStats();return}
- const grouped={};photos.forEach(p=>(grouped[p.date]??=[]).push(p));
- Object.keys(grouped).sort((a,b)=>b.localeCompare(a)).forEach(d=>{
-  const section=document.createElement("div");section.className="day-section";
-  const header=document.createElement("div");header.className="day-header";
-  const title=document.createElement("div");title.innerHTML=`<div class="day-title">📅 ${displayDate(d)}</div><div class="day-count">${grouped[d].length} records</div>`;
-  const actions=document.createElement("div");actions.className="day-actions";
-  const dbtn=document.createElement("button");dbtn.className="download-day";dbtn.textContent="⬇ Day ZIP";dbtn.onclick=()=>downloadDay(d,grouped[d],dbtn);
-  actions.appendChild(dbtn);header.append(title,actions);section.appendChild(header);
-  grouped[d].forEach(photo=>{
-   const item=document.createElement("div");item.className="photo-item";
-   const img=document.createElement("img");img.className="photo-thumb";img.src=URL.createObjectURL(photo.blob);
-   img.onclick=async()=>{const a=await getAllPhotos();a.sort((x,y)=>y.timestamp-x.timestamp);openViewer(a,a.findIndex(x=>x.id===photo.id))};
-   const info=document.createElement("div");info.className="photo-info";info.innerHTML=`<div class="photo-time">${photo.time}</div><div class="photo-type">Visitor detected</div>`;
-   const acts=document.createElement("div");acts.className="photo-actions";
-   const dl=document.createElement("button");dl.className="photo-download";dl.textContent="⬇";dl.title="Download";dl.onclick=e=>{e.stopPropagation();downloadPhoto(photo)};
-   const del=document.createElement("button");del.className="photo-delete";del.textContent="✕";del.title="Delete incorrect record";del.onclick=e=>{e.stopPropagation();confirmDelete(photo)};
-   acts.append(dl,del);item.append(img,info,acts);section.appendChild(item);
-  });history.appendChild(section);
- });
- await updateStats();
+
+
+/* =====================================================
+   DATE KEY
+===================================================== */
+
+function getDateKey(date) {
+
+    const year =
+        date.getFullYear();
+
+    const month =
+        String(
+            date.getMonth() + 1
+        ).padStart(
+            2,
+            "0"
+        );
+
+    const day =
+        String(
+            date.getDate()
+        ).padStart(
+            2,
+            "0"
+        );
+
+
+    return (
+        year +
+        "-" +
+        month +
+        "-" +
+        day
+    );
+
 }
 
-async function confirmDelete(photo){
- if(!confirm("Delete this visitor record?\n\nThe photograph will be permanently removed from this browser and daily/monthly statistics will be recalculated."))return;
- await deletePhoto(photo.id);await renderHistory();
- if(viewerPhotos.some(p=>p.id===photo.id))closeViewer();
+
+
+/* =====================================================
+   DISPLAY DATE
+===================================================== */
+
+function displayDate(
+    dateString
+) {
+
+    const parts =
+        dateString.split("-");
+
+
+    const date =
+        new Date(
+
+            Number(parts[0]),
+
+            Number(parts[1]) - 1,
+
+            Number(parts[2])
+
+        );
+
+
+    return date.toLocaleDateString(
+        undefined,
+        {
+            day: "numeric",
+            month: "long",
+            year: "numeric"
+        }
+    );
+
 }
 
-function openViewer(photos,index){viewerPhotos=[...photos].sort((a,b)=>b.timestamp-a.timestamp);viewerIndex=Math.max(0,Math.min(index,viewerPhotos.length-1));viewerObjectUrls.forEach(URL.revokeObjectURL);viewerObjectUrls=viewerPhotos.map(p=>URL.createObjectURL(p.blob));document.getElementById("photoModal").style.display="flex";updateViewer()}
-function updateViewer(){if(!viewerPhotos.length)return;const p=viewerPhotos[viewerIndex];document.getElementById("modalImage").src=viewerObjectUrls[viewerIndex];document.getElementById("viewerCounter").textContent=(viewerIndex+1)+" / "+viewerPhotos.length;document.getElementById("viewerTime").textContent=displayDate(p.date)+" | "+p.time;const a=document.getElementById("viewerDownload");a.href=viewerObjectUrls[viewerIndex];a.download="MANAGE-Library-"+p.date+"-"+p.time.replace(/:/g,"-")+".jpg";document.getElementById("previousPhoto").disabled=viewerIndex===0;document.getElementById("nextPhoto").disabled=viewerIndex===viewerPhotos.length-1}
-function closeViewer(){document.getElementById("photoModal").style.display="none";viewerObjectUrls.forEach(URL.revokeObjectURL);viewerObjectUrls=[];viewerPhotos=[]}
-document.getElementById("previousPhoto").onclick=()=>{if(viewerIndex>0){viewerIndex--;updateViewer()}};document.getElementById("nextPhoto").onclick=()=>{if(viewerIndex<viewerPhotos.length-1){viewerIndex++;updateViewer()}};document.getElementById("closeModal").onclick=closeViewer;
-document.getElementById("photoModal").onclick=e=>{if(e.target.id==="photoModal")closeViewer()};document.addEventListener("keydown",e=>{if(document.getElementById("photoModal").style.display!=="flex")return;if(e.key==="ArrowLeft"&&viewerIndex>0){viewerIndex--;updateViewer()}if(e.key==="ArrowRight"&&viewerIndex<viewerPhotos.length-1){viewerIndex++;updateViewer()}if(e.key==="Escape")closeViewer()});
-function downloadPhoto(p){const u=URL.createObjectURL(p.blob),a=document.createElement("a");a.href=u;a.download="MANAGE-Library-"+p.date+"-"+p.time.replace(/:/g,"-")+".jpg";a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
 
-async function downloadDay(date,photos,button){
- button.disabled=true;button.textContent="Creating...";
- try{const z=new JSZip(),f=z.folder("MANAGE-Library-"+date);photos.forEach((p,i)=>f.file(String(i+1).padStart(3,"0")+"-"+p.time.replace(/:/g,"-")+".jpg",p.blob));const c=await z.generateAsync({type:"blob",compression:"DEFLATE"}),u=URL.createObjectURL(c),a=document.createElement("a");a.href=u;a.download="MANAGE-Library-"+date+".zip";a.click();setTimeout(()=>URL.revokeObjectURL(u),2000)}finally{button.disabled=false;button.textContent="⬇ Day ZIP"}
-}
-async function downloadAllPhotos(){
- const photos=await getAllPhotos();if(!photos.length){alert("There are no visitor records to download.");return}const b=document.getElementById("downloadAllButton");b.disabled=true;b.textContent="Creating ZIP...";
- try{const z=new JSZip(),g={};photos.forEach(p=>(g[p.date]??=[]).push(p));Object.keys(g).forEach(d=>{const f=z.folder(d);g[d].forEach((p,i)=>f.file(String(i+1).padStart(3,"0")+"-"+p.time.replace(/:/g,"-")+".jpg",p.blob))});const c=await z.generateAsync({type:"blob",compression:"DEFLATE"}),u=URL.createObjectURL(c),a=document.createElement("a");a.href=u;a.download="MANAGE-Library-All-Visitor-Records.zip";a.click();setTimeout(()=>URL.revokeObjectURL(u),2000)}finally{b.disabled=false;b.textContent="⬇ Download All Visitor Records"}
+
+/* =====================================================
+   RENDER HISTORY
+===================================================== */
+
+async function renderHistory() {
+
+    const history =
+        document.getElementById(
+            "history"
+        );
+
+
+    const summary =
+        document.getElementById(
+            "historySummary"
+        );
+
+
+    const photos =
+        await getAllPhotos();
+
+
+    photos.sort(
+        (a, b) =>
+            b.timestamp -
+            a.timestamp
+    );
+
+
+    /*
+    Total photos
+    */
+
+    summary.textContent =
+        photos.length +
+        " photo" +
+        (
+            photos.length === 1
+                ? ""
+                : "s"
+        ) +
+        " stored";
+
+
+    document.getElementById(
+        "photoCount"
+    ).textContent =
+        photos.length;
+
+
+    document.getElementById(
+        "leftPhotoCount"
+    ).textContent =
+        photos.length;
+
+
+    /*
+    Today's photos
+    */
+
+    const today =
+        getDateKey(
+            new Date()
+        );
+
+
+    const todayPhotos =
+        photos.filter(
+            photo =>
+                photo.date === today
+        );
+
+
+    document.getElementById(
+        "todayCount"
+    ).textContent =
+        todayPhotos.length;
+
+
+    document.getElementById(
+        "leftTodayCount"
+    ).textContent =
+        todayPhotos.length;
+
+
+    /*
+    Empty
+    */
+
+    if (
+        photos.length === 0
+    ) {
+
+        history.innerHTML =
+
+            '<div class="empty-history">' +
+
+            'No photographs captured yet.' +
+
+            '</div>';
+
+        return;
+
+    }
+
+
+    /*
+    Group by date.
+    */
+
+    const grouped = {};
+
+
+    photos.forEach(
+        photo => {
+
+            if (
+                !grouped[photo.date]
+            ) {
+
+                grouped[photo.date] =
+                    [];
+
+            }
+
+
+            grouped[photo.date].push(
+                photo
+            );
+
+        }
+    );
+
+
+    history.innerHTML =
+        "";
+
+
+    const dates =
+        Object.keys(grouped).sort(
+            (a, b) =>
+                b.localeCompare(a)
+        );
+
+
+    dates.forEach(
+        date => {
+
+            const section =
+                document.createElement(
+                    "div"
+                );
+
+
+            section.className =
+                "day-section";
+
+
+            /*
+            Header
+            */
+
+            const header =
+                document.createElement(
+                    "div"
+                );
+
+
+            header.className =
+                "day-header";
+
+
+            const title =
+                document.createElement(
+                    "div"
+                );
+
+
+            title.innerHTML =
+
+                '<div class="day-title">' +
+
+                "📅 " +
+                displayDate(date) +
+
+                '</div>' +
+
+                '<div class="day-count">' +
+
+                grouped[date].length +
+
+                " photo" +
+
+                (
+                    grouped[date].length === 1
+                        ? ""
+                        : "s"
+                ) +
+
+                "</div>";
+
+
+            const downloadButton =
+                document.createElement(
+                    "button"
+                );
+
+
+            downloadButton.className =
+                "download-day";
+
+
+            downloadButton.textContent =
+                "⬇ Download Day";
+
+
+            downloadButton.onclick =
+                function() {
+
+                    downloadDay(
+                        date,
+                        grouped[date],
+                        downloadButton
+                    );
+
+                };
+
+
+            header.appendChild(
+                title
+            );
+
+
+            header.appendChild(
+                downloadButton
+            );
+
+
+            section.appendChild(
+                header
+            );
+
+
+            /*
+            Individual photos
+            */
+
+            grouped[date].forEach(
+                photo => {
+
+                    const item =
+                        document.createElement(
+                            "div"
+                        );
+
+
+                    item.className =
+                        "photo-item";
+
+
+                    const image =
+                        document.createElement(
+                            "img"
+                        );
+
+
+                    image.className =
+                        "photo-thumb";
+
+
+                    const objectURL =
+                        URL.createObjectURL(
+                            photo.blob
+                        );
+
+
+                    image.src =
+                        objectURL;
+
+
+                    image.onclick =
+                        function() {
+
+                            openPhoto(
+                                photo.id
+                            );
+
+                        };
+
+
+                    const info =
+                        document.createElement(
+                            "div"
+                        );
+
+
+                    info.className =
+                        "photo-info";
+
+
+                    info.innerHTML =
+
+                        '<div class="photo-time">' +
+
+                        photo.time +
+
+                        '</div>' +
+
+                        '<div class="photo-type">' +
+
+                        'Motion detected' +
+
+                        '</div>';
+
+
+                    const download =
+                        document.createElement(
+                            "button"
+                        );
+
+
+                    download.className =
+                        "photo-download";
+
+
+                    download.textContent =
+                        "⬇";
+
+
+                    download.title =
+                        "Download photo";
+
+
+                    download.onclick =
+                        function() {
+
+                            downloadPhoto(
+                                photo
+                            );
+
+                        };
+
+
+                    item.appendChild(
+                        image
+                    );
+
+
+                    item.appendChild(
+                        info
+                    );
+
+
+                    item.appendChild(
+                        download
+                    );
+
+
+                    section.appendChild(
+                        item
+                    );
+
+                }
+            );
+
+
+            history.appendChild(
+                section
+            );
+
+        }
+    );
+
 }
 
-function csvEscape(v){return '"'+String(v).replace(/"/g,'""')+'"'}
-function makeDailyReport(photos,date){
- const rows=photos.filter(p=>p.date===date).sort((a,b)=>a.timestamp-b.timestamp),est=estimateVisitors(rows.length);
- return {title:"Daily Visitor Report",subtitle:displayDate(date),rows,est,detected:rows.length};
-}
-function makeMonthlyReport(photos,month){
- const rows=photos.filter(p=>p.date.startsWith(month)).sort((a,b)=>a.timestamp-b.timestamp),byDay={};rows.forEach(p=>(byDay[p.date]??=[]).push(p));
- let busiest="",max=0;Object.entries(byDay).forEach(([d,a])=>{if(a.length>max){max=a.length;busiest=d}});
- return {title:"Monthly Visitor Report",subtitle:new Date(+month.slice(0,4),+month.slice(5)-1,1).toLocaleDateString(undefined,{month:"long",year:"numeric"}),rows,est:estimateVisitors(rows.length),detected:rows.length,byDay,busiest};
+
+
+/* =====================================================
+   INDIVIDUAL DOWNLOAD
+===================================================== */
+
+function downloadPhoto(
+    photo
+) {
+
+    const url =
+        URL.createObjectURL(
+            photo.blob
+        );
+
+
+    const link =
+        document.createElement(
+            "a"
+        );
+
+
+    link.href =
+        url;
+
+
+    link.download =
+
+        "MANAGE-Library-" +
+
+        photo.date +
+
+        "-" +
+
+        photo.time.replace(
+            /:/g,
+            "-"
+        ) +
+
+        ".jpg";
+
+
+    document.body.appendChild(
+        link
+    );
+
+
+    link.click();
+
+
+    link.remove();
+
+
+    setTimeout(
+        () =>
+            URL.revokeObjectURL(url),
+        1000
+    );
+
 }
 
-function showReport(report){
- currentReport=report;document.getElementById("reportModal").style.display="flex";
- const activeDays=report.byDay?Object.keys(report.byDay).length:(report.detected?1:0),avg=activeDays?(report.est/activeDays).toFixed(1):"0";
- let html=`<h2>MANAGE LIBRARY</h2><h3>${report.title}</h3><p><strong>${report.subtitle}</strong></p><div class="report-summary"><div>Detected Records<strong>${report.detected}</strong></div><div>Estimated Visitors<strong>${report.est}</strong></div><div>Active Days<strong>${activeDays}</strong></div><div>Avg./Active Day<strong>${avg}</strong></div></div>`;
- if(report.busiest)html+=`<p><strong>Busiest Day:</strong> ${displayDate(report.busiest)} (${report.byDay[report.busiest].length} records; estimated ${estimateVisitors(report.byDay[report.busiest].length)} visitors)</p>`;
- if(report.byDay){
-  html+='<table class="report-table"><tr><th>Date</th><th>Detected Records</th><th>Estimated Visitors</th></tr>';
-  Object.keys(report.byDay).sort().forEach(d=>html+=`<tr><td>${displayDate(d)}</td><td>${report.byDay[d].length}</td><td>${estimateVisitors(report.byDay[d].length)}</td></tr>`);
-  html+='</table><br>';
- }
- html+='<h3>Detailed Records</h3><table class="report-table"><tr><th>S. No.</th><th>Date</th><th>Time</th><th>Record</th></tr>';
- report.rows.forEach((p,i)=>html+=`<tr><td>${i+1}</td><td>${p.date}</td><td>${p.time}</td><td>Visitor detected</td></tr>`);
- html+=`</table>`;
- document.getElementById("reportContent").innerHTML=html;
-}
-function downloadReportCSV(){
- if(!currentReport)return;
- let csv="MANAGE LIBRARY - "+currentReport.title+"\n"+currentReport.subtitle+"\n\nDetected Records,"+currentReport.detected+"\nEstimated Visitors,"+currentReport.est+"\n\nS. No.,Date,Time,Record\n";
- currentReport.rows.forEach((p,i)=>csv+=`${i+1},${csvEscape(p.date)},${csvEscape(p.time)},${csvEscape("Visitor detected")}\n`);
- const blob=new Blob([csv],{type:"text/csv;charset=utf-8"}),u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download="MANAGE-Library-"+currentReport.title.replaceAll(" ","-")+"-"+currentReport.subtitle.replaceAll(" ","-")+".csv";a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)
-}
-function printReport(){window.print()}
-document.getElementById("downloadReportCSV").onclick=downloadReportCSV;document.getElementById("downloadReportPDF").onclick=printReport;document.getElementById("closeReport").onclick=()=>document.getElementById("reportModal").style.display="none";
 
-document.getElementById("dailyReportButton").onclick=async()=>{
- const all=await getAllPhotos(),date=document.getElementById("dateFilter").value!=="all"?document.getElementById("dateFilter").value:getDateKey(new Date());
- showReport(makeDailyReport(all,date));
+
+/* =====================================================
+   DOWNLOAD DAY
+===================================================== */
+
+async function downloadDay(
+    date,
+    photos,
+    button
+) {
+
+    if (
+        !photos ||
+        photos.length === 0
+    ) {
+
+        return;
+
+    }
+
+
+    button.disabled =
+        true;
+
+
+    button.textContent =
+        "Creating...";
+
+
+    try {
+
+        const zip =
+            new JSZip();
+
+
+        const folder =
+            zip.folder(
+                "MANAGE-Library-" +
+                date
+            );
+
+
+        photos.forEach(
+            (photo, index) => {
+
+                const filename =
+
+                    String(
+                        index + 1
+                    ).padStart(
+                        3,
+                        "0"
+                    ) +
+
+                    "-" +
+
+                    photo.time.replace(
+                        /:/g,
+                        "-"
+                    ) +
+
+                    ".jpg";
+
+
+                folder.file(
+                    filename,
+                    photo.blob
+                );
+
+            }
+        );
+
+
+        const content =
+            await zip.generateAsync(
+                {
+                    type: "blob",
+                    compression: "DEFLATE"
+                }
+            );
+
+
+        const url =
+            URL.createObjectURL(
+                content
+            );
+
+
+        const link =
+            document.createElement(
+                "a"
+            );
+
+
+        link.href =
+            url;
+
+
+        link.download =
+
+            "MANAGE-Library-" +
+            date +
+            ".zip";
+
+
+        document.body.appendChild(
+            link
+        );
+
+
+        link.click();
+
+
+        link.remove();
+
+
+        setTimeout(
+            () =>
+                URL.revokeObjectURL(url),
+            2000
+        );
+
+    }
+
+    catch(error) {
+
+        console.error(
+            error
+        );
+
+
+        alert(
+            "Could not create ZIP:\n" +
+            error.message
+        );
+
+    }
+
+
+    finally {
+
+        button.disabled =
+            false;
+
+        button.textContent =
+            "⬇ Download Day";
+
+    }
+
+}
+
+
+
+/* =====================================================
+   DOWNLOAD ALL
+===================================================== */
+
+async function downloadAllPhotos() {
+
+    const photos =
+        await getAllPhotos();
+
+
+    if (
+        photos.length === 0
+    ) {
+
+        alert(
+            "There are no photos to download."
+        );
+
+        return;
+
+    }
+
+
+    const button =
+        document.getElementById(
+            "downloadAllButton"
+        );
+
+
+    button.disabled =
+        true;
+
+
+    button.textContent =
+        "Creating ZIP...";
+
+
+    try {
+
+        const zip =
+            new JSZip();
+
+
+        const grouped = {};
+
+
+        photos.forEach(
+            photo => {
+
+                if (
+                    !grouped[photo.date]
+                ) {
+
+                    grouped[photo.date] =
+                        [];
+
+                }
+
+
+                grouped[photo.date].push(
+                    photo
+                );
+
+            }
+        );
+
+
+        Object.keys(grouped).forEach(
+            date => {
+
+                const folder =
+                    zip.folder(
+                        date
+                    );
+
+
+                grouped[date].forEach(
+                    (photo, index) => {
+
+                        const filename =
+
+                            String(
+                                index + 1
+                            ).padStart(
+                                3,
+                                "0"
+                            ) +
+
+                            "-" +
+
+                            photo.time.replace(
+                                /:/g,
+                                "-"
+                            ) +
+
+                            ".jpg";
+
+
+                        folder.file(
+                            filename,
+                            photo.blob
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+
+        const content =
+            await zip.generateAsync(
+                {
+                    type: "blob",
+                    compression: "DEFLATE"
+                }
+            );
+
+
+        const url =
+            URL.createObjectURL(
+                content
+            );
+
+
+        const link =
+            document.createElement(
+                "a"
+            );
+
+
+        link.href =
+            url;
+
+
+        link.download =
+            "MANAGE-Library-All-Photos.zip";
+
+
+        document.body.appendChild(
+            link
+        );
+
+
+        link.click();
+
+
+        link.remove();
+
+
+        setTimeout(
+            () =>
+                URL.revokeObjectURL(url),
+            2000
+        );
+
+    }
+
+    catch(error) {
+
+        console.error(
+            error
+        );
+
+
+        alert(
+            "Could not create ZIP:\n" +
+            error.message
+        );
+
+    }
+
+
+    finally {
+
+        button.disabled =
+            false;
+
+        button.textContent =
+            "⬇ Download All Photos";
+
+    }
+
+}
+
+
+
+/* =====================================================
+   PHOTO VIEWER
+===================================================== */
+
+let viewerPhotos = [];
+let viewerIndex = 0;
+let viewerObjectURLs = [];
+
+function openPhoto(photoId) {
+    getAllPhotos().then(photos => {
+        photos.sort((a, b) => b.timestamp - a.timestamp);
+        viewerPhotos = photos;
+        viewerIndex = viewerPhotos.findIndex(photo => photo.id === photoId);
+        if (viewerIndex < 0) viewerIndex = 0;
+
+        viewerObjectURLs.forEach(url => URL.revokeObjectURL(url));
+        viewerObjectURLs = viewerPhotos.map(photo => URL.createObjectURL(photo.blob));
+
+        document.getElementById("photoModal").style.display = "flex";
+        updatePhotoViewer();
+    });
+}
+
+function updatePhotoViewer() {
+    if (!viewerPhotos.length) return;
+
+    const photo = viewerPhotos[viewerIndex];
+
+    document.getElementById("modalImage").src =
+        viewerObjectURLs[viewerIndex];
+
+    document.getElementById("viewerCounter").textContent =
+        (viewerIndex + 1) + " / " + viewerPhotos.length;
+
+    document.getElementById("viewerTime").textContent =
+        displayDate(photo.date) + " | " + photo.time;
+
+    document.getElementById("previousPhoto").disabled =
+        viewerIndex === 0;
+
+    document.getElementById("nextPhoto").disabled =
+        viewerIndex === viewerPhotos.length - 1;
+
+    const download = document.getElementById("viewerDownload");
+    download.href = viewerObjectURLs[viewerIndex];
+    download.download =
+        "MANAGE-Library-" +
+        photo.date + "-" +
+        photo.time.replace(/:/g, "-") +
+        ".jpg";
+}
+
+function showPreviousPhoto() {
+    if (viewerIndex > 0) {
+        viewerIndex--;
+        updatePhotoViewer();
+    }
+}
+
+function showNextPhoto() {
+    if (viewerIndex < viewerPhotos.length - 1) {
+        viewerIndex++;
+        updatePhotoViewer();
+    }
+}
+
+function closePhotoViewer() {
+    document.getElementById("photoModal").style.display = "none";
+    viewerObjectURLs.forEach(url => URL.revokeObjectURL(url));
+    viewerObjectURLs = [];
+    viewerPhotos = [];
+    viewerIndex = 0;
+}
+
+document.getElementById("previousPhoto").onclick = showPreviousPhoto;
+document.getElementById("nextPhoto").onclick = showNextPhoto;
+document.getElementById("closeModal").onclick = closePhotoViewer;
+
+document.getElementById("photoModal").onclick = function(event) {
+    if (event.target === this) closePhotoViewer();
 };
-document.getElementById("monthlyReportButton").onclick=async()=>{
- const all=await getAllPhotos(),month=document.getElementById("monthFilter").value!=="all"?document.getElementById("monthFilter").value:getDateKey(new Date()).slice(0,7);
- showReport(makeMonthlyReport(all,month));
-};
-document.getElementById("dateFilter").onchange=renderHistory;document.getElementById("monthFilter").onchange=renderHistory;document.getElementById("downloadAllButton").onclick=downloadAllPhotos;
 
-const video=document.getElementById("camera"),startButton=document.getElementById("startButton"),stopButton=document.getElementById("stopButton"),status=document.getElementById("status"),cameraStat=document.getElementById("cameraStat"),cameraBadge=document.getElementById("cameraBadge"),systemStatusText=document.getElementById("systemStatusText"),statusDot=document.getElementById("statusDot"),cameraStatusBox=document.getElementById("cameraStatusBox"),sensitivity=document.getElementById("sensitivity"),photoQuality=document.getElementById("photoQuality"),qualityInfo=document.getElementById("qualityInfo"),cooldown=document.getElementById("cooldown"),cooldownValue=document.getElementById("cooldownValue"),latestPhoto=document.getElementById("latestPhoto"),noPhoto=document.getElementById("noPhoto"),downloadLatest=document.getElementById("downloadLatest"),visitorAlert=document.getElementById("visitorAlert");
-let stream=null,running=false,animationFrame=null,previousFrame=null,visitorCount=0,lastCaptureTime=0,motionConfirmed=false,motionFrames=0,noMotionFrames=0,reconnectTimer=null;
-const motionCanvas=document.createElement("canvas"),motionContext=motionCanvas.getContext("2d",{willReadFrequently:true});
-function getPhotoQuality(){return photoQuality.value==="medium"?{width:640,height:360,quality:.50}:{width:1280,height:720,quality:.70}}
-function updateQualityInfo(){const s=getPhotoQuality();qualityInfo.innerHTML=s.width+" × "+s.height+" pixels<br>JPEG quality: "+Math.round(s.quality*100)+"%"}
-photoQuality.onchange=updateQualityInfo;updateQualityInfo();cooldown.oninput=()=>cooldownValue.textContent=cooldown.value+" sec";
+/* Keyboard: Left = previous, Right = next, Esc = close */
+document.addEventListener("keydown", function(event) {
+    const modal = document.getElementById("photoModal");
+    if (modal.style.display !== "flex") return;
+
+    if (event.key === "ArrowLeft") showPreviousPhoto();
+    else if (event.key === "ArrowRight") showNextPhoto();
+    else if (event.key === "Escape") closePhotoViewer();
+});
+
+/* Mouse wheel: scroll down = next, scroll up = previous */
+document.getElementById("photoModal").addEventListener("wheel", function(event) {
+    if (!viewerPhotos.length) return;
+    event.preventDefault();
+    if (event.deltaY > 0) showNextPhoto();
+    else if (event.deltaY < 0) showPreviousPhoto();
+}, { passive: false });
 
 
-async function startCamera(){
- if(running) return;
 
- setStatus("Starting camera...");
+/* =====================================================
+   CAMERA VARIABLES
+===================================================== */
 
- try{
-  if(!window.isSecureContext){
-   throw new Error("Camera access requires HTTPS. Open the GitHub Pages HTTPS address.");
-  }
+let stream = null;
 
-  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-   throw new Error("Camera API is unavailable in this browser.");
-  }
+let running = false;
 
-  // First request the camera with the simplest possible constraint.
-  // This avoids compatibility problems caused by resolution/facingMode settings.
-  let newStream;
-  try{
-   newStream = await navigator.mediaDevices.getUserMedia({
-    video: true,
-    audio: false
-   });
-  }catch(firstError){
-   console.error("Basic camera request failed:", firstError);
+let animationFrame = null;
 
-   // Second attempt with explicit environment/user facing modes.
-   newStream = await navigator.mediaDevices.getUserMedia({
-    video: {
-     width: {ideal: 1280},
-     height: {ideal: 720}
-    },
-    audio: false
-   });
-  }
+let previousFrame = null;
 
-  stream = newStream;
+let motionCounter = 0;
 
-  // Attach the stream first, then wait for video metadata.
-  video.srcObject = stream;
+let photoCounter = 0;
 
-  await new Promise((resolve,reject)=>{
-   const timeout=setTimeout(()=>reject(new Error("Camera opened but video did not start within 10 seconds.")),10000);
+let lastCaptureTime = 0;
 
-   if(video.readyState >= 2){
-    clearTimeout(timeout);
-    resolve();
-    return;
-   }
+let motionStarted = false;
 
-   video.onloadedmetadata=()=>{
-    clearTimeout(timeout);
-    resolve();
-   };
+let stableFrames = 0;
 
-   video.onerror=()=>{
-    clearTimeout(timeout);
-    reject(new Error("The browser could not display the camera stream."));
-   };
-  });
 
-  await video.play();
+/*
+Motion analysis canvas.
+*/
 
-  // Camera is now genuinely running.
-  running=true;
-  motionCanvas.width=480;
-  motionCanvas.height=270;
-  previousFrame=null;
-  motionConfirmed=false;
-  motionFrames=0;
-  noMotionFrames=0;
+const motionCanvas =
+    document.createElement(
+        "canvas"
+    );
 
-  startButton.disabled=true;
-  stopButton.disabled=false;
 
-  cameraStat.textContent="ON";
-  cameraStatusBox.textContent="🟢 Camera Online";
-  cameraStatusBox.className="camera-status-box online";
+const motionContext =
+    motionCanvas.getContext(
+        "2d",
+        {
+            willReadFrequently: true
+        }
+    );
 
-  cameraBadge.textContent="● CAMERA LIVE";
-  cameraBadge.classList.add("live");
 
-  systemStatusText.textContent="Monitoring Active";
-  statusDot.classList.add("active");
 
-  setStatus("Camera active. Monitoring for visitors...","success");
+/* =====================================================
+   CAMERA ELEMENTS
+===================================================== */
 
-  // Some browsers report the stream as live a little later.
-  stream.getVideoTracks().forEach(track=>{
-   track.onended=()=>scheduleReconnect();
-   track.onmute=()=>setStatus("Camera temporarily paused...","motion");
-   track.onunmute=()=>setStatus("Camera active. Monitoring for visitors...","success");
-  });
+const video =
+    document.getElementById(
+        "camera"
+    );
 
-  detectMotion();
 
- }catch(e){
-  console.error("CAMERA START ERROR:",e);
+const startButton =
+    document.getElementById(
+        "startButton"
+    );
 
-  if(stream){
-   stream.getTracks().forEach(track=>track.stop());
-   stream=null;
-  }
 
-  video.srcObject=null;
-  running=false;
+const stopButton =
+    document.getElementById(
+        "stopButton"
+    );
 
-  startButton.disabled=false;
-  stopButton.disabled=true;
-  cameraStat.textContent="OFF";
-  cameraStatusBox.textContent="⚪ Camera Offline";
-  cameraStatusBox.className="camera-status-box";
-  cameraBadge.textContent="CAMERA OFF";
-  cameraBadge.classList.remove("live");
-  systemStatusText.textContent="Camera Off";
-  statusDot.classList.remove("active");
 
-  let message="Camera could not start: "+e.message;
+const status =
+    document.getElementById(
+        "status"
+    );
 
-  if(e.name==="NotAllowedError"){
-   message="🔒 Camera permission denied. Click the camera icon in the browser address bar and allow Camera, then reload the page.";
-  }else if(e.name==="NotFoundError"){
-   message="📷 No camera found. Check that the webcam is connected.";
-  }else if(e.name==="NotReadableError"){
-   message="📷 Camera is being used by another application. Close Teams, Zoom, Camera app, WhatsApp, etc., then try again.";
-  }else if(e.name==="SecurityError"){
-   message="🔒 Camera access was blocked by browser security. Use the HTTPS GitHub Pages address.";
-  }
 
-  setStatus(message,"error");
- }
-}
-function stopCamera(){
- running=false;if(animationFrame)cancelAnimationFrame(animationFrame);animationFrame=null;if(reconnectTimer)clearTimeout(reconnectTimer);
- if(stream)stream.getTracks().forEach(t=>t.stop());stream=null;video.srcObject=null;previousFrame=null;startButton.disabled=false;stopButton.disabled=true;cameraStat.textContent="OFF";cameraStatusBox.textContent="⚪ Camera Offline";cameraStatusBox.className="camera-status-box";cameraBadge.textContent="CAMERA OFF";cameraBadge.classList.remove("live");systemStatusText.textContent="Camera Off";statusDot.classList.remove("active");setStatus("Camera stopped.")
-}
-function scheduleReconnect(){
- if(!running || reconnectTimer)return;
- setStatus("🔴 Camera stream stopped. Reconnecting...","error");
- reconnectTimer=setTimeout(async()=>{
-  reconnectTimer=null;
-  if(!running)return;
-  if(stream)stream.getTracks().forEach(t=>t.stop());
-  stream=null;
-  running=false;
-  try{
-   await startCamera();
-  }catch(e){
-   console.error("Automatic reconnect failed:",e);
-   running=true;
-   scheduleReconnect();
-  }
- },3000);
-}
-video.onended=()=>scheduleReconnect();
+const cameraStatus =
+    document.getElementById(
+        "cameraStat"
+    );
 
-function monitorCameraTrack(){
- if(!stream || !running)return;
- const tracks=stream.getVideoTracks();
- if(!tracks.length || tracks[0].readyState==="ended"){
-  scheduleReconnect();
- }
-}
 
-function detectMotion(){
- if(!running)return;if(video.readyState<2){animationFrame=requestAnimationFrame(detectMotion);return}
- motionContext.drawImage(video,0,0,480,270);const currentFrame=motionContext.getImageData(0,0,480,270);if(!previousFrame){previousFrame=currentFrame;animationFrame=requestAnimationFrame(detectMotion);return}
- const c=currentFrame.data,p=previousFrame.data;let threshold,requiredBlocks;
- if(sensitivity.value==="high"){threshold=10;requiredBlocks=5}else if(sensitivity.value==="medium"){threshold=15;requiredBlocks=8}else{threshold=21;requiredBlocks=12}
- let changed=0;
- for(let y=0;y<270;y+=20)for(let x=0;x<480;x+=20){let cb=0,pb=0,n=0;for(let yy=y;yy<y+20&&yy<270;yy++)for(let xx=x;xx<x+20&&xx<480;xx++){const i=(yy*480+xx)*4;cb+=(c[i]+c[i+1]+c[i+2])/3;pb+=(p[i]+p[i+1]+p[i+2])/3;n++}if(n&&Math.abs(cb/n-pb/n)>=threshold)changed++}
- previousFrame=currentFrame;
- if(changed>=requiredBlocks){motionFrames++;noMotionFrames=0;if(motionFrames>=3&&!motionConfirmed){motionConfirmed=true;const now=Date.now();if(now-lastCaptureTime>=Number(cooldown.value)*1000){visitorAlert.classList.add("show");setStatus("👤 Visitor detected — selecting clear frame...","motion");captureBestFrame();lastCaptureTime=now;setTimeout(()=>visitorAlert.classList.remove("show"),1800)}}}
- else{noMotionFrames++;motionFrames=0;if(noMotionFrames>=8)motionConfirmed=false;if(running)setStatus("Monitoring for visitors...","success")}
- animationFrame=requestAnimationFrame(detectMotion)
-}
+const cameraBadge =
+    document.getElementById(
+        "cameraBadge"
+    );
 
-async function captureBestFrame(){
- if(!video.videoWidth)return;const s=getPhotoQuality(),candidates=[];
- for(let i=0;i<5;i++){if(!running)break;const canvas=document.createElement("canvas");canvas.width=s.width;canvas.height=s.height;canvas.getContext("2d").drawImage(video,0,0,s.width,s.height);candidates.push({canvas,score:sharpness(canvas)});await new Promise(r=>setTimeout(r,60))}
- if(candidates.length){candidates.sort((a,b)=>b.score-a.score);saveCapturedCanvas(candidates[0].canvas,s)}
-}
-function setStatus(message, type = "") {
- const statusElement = document.getElementById("status");
- statusElement.textContent = message;
- statusElement.className = "live-status";
- if(type) statusElement.classList.add(type);
-}
 
-function sharpness(canvas){
- const w=160,h=90,t=document.createElement("canvas");t.width=w;t.height=h;const x=t.getContext("2d");x.drawImage(canvas,0,0,w,h);const d=x.getImageData(0,0,w,h).data;let s=0;
- for(let y=1;y<h;y+=2)for(let x1=1;x1<w;x1+=2){const i=(y*w+x1)*4,l=(d[i-4]+d[i-3]+d[i-2])/3,q=(d[i]+d[i+1]+d[i+2])/3,j=((y-1)*w+x1)*4,a=(d[j]+d[j+1]+d[j+2])/3;s+=Math.abs(q-l)+Math.abs(q-a)}return s
+const systemStatusText =
+    document.getElementById(
+        "systemStatusText"
+    );
+
+
+const statusDot =
+    document.getElementById(
+        "statusDot"
+    );
+
+
+const cameraStatusBox =
+    document.getElementById(
+        "cameraStatusBox"
+    );
+
+
+const sensitivity =
+    document.getElementById(
+        "sensitivity"
+    );
+
+
+const photoQuality =
+    document.getElementById(
+        "photoQuality"
+    );
+
+
+const qualityInfo =
+    document.getElementById(
+        "qualityInfo"
+    );
+
+
+const cooldown =
+    document.getElementById(
+        "cooldown"
+    );
+
+
+const cooldownValue =
+    document.getElementById(
+        "cooldownValue"
+    );
+
+
+const latestPhoto =
+    document.getElementById(
+        "latestPhoto"
+    );
+
+
+const noPhoto =
+    document.getElementById(
+        "noPhoto"
+    );
+
+
+const downloadLatest =
+    document.getElementById(
+        "downloadLatest"
+    );
+
+
+
+/* =====================================================
+   PHOTO QUALITY DISPLAY
+===================================================== */
+
+function updateQualityInfo() {
+
+    const settings =
+        getPhotoQuality();
+
+
+    const qualityPercent =
+        Math.round(
+            settings.quality * 100
+        );
+
+
+    qualityInfo.innerHTML =
+
+        settings.width +
+        " × " +
+        settings.height +
+
+        " pixels<br>" +
+
+        "JPEG quality: " +
+        qualityPercent +
+        "%";
+
 }
 
-const logoImage=new Image();logoImage.crossOrigin="anonymous";logoImage.src=REAL_LOGO_URL;
-function drawWatermark(ctx,canvas,s){
- const pad=Math.max(10,Math.round(12*s.width/1280)),boxH=Math.max(65,Math.round(80*s.height/720)),logoW=Math.min(140,Math.round(150*s.width/1280)),ratio=(logoImage.naturalWidth||263)/(logoImage.naturalHeight||219),logoH=logoW/ratio;
- const y=canvas.height-boxH-pad,x=pad,boxW=logoW+pad*2;ctx.fillStyle="rgba(255,255,255,.93)";ctx.fillRect(x,y,boxW,boxH);
- if(logoImage.complete&&logoImage.naturalWidth)ctx.drawImage(logoImage,x+pad,y+(boxH-logoH)/2,logoW,logoH);
- const tx=x+boxW+10,tw=Math.min(canvas.width-tx-pad,canvas.width*.55);ctx.fillStyle="rgba(0,0,0,.72)";ctx.fillRect(tx,y,tw,boxH);ctx.fillStyle="#fff";
- const ts=Math.max(15,Math.round(20*s.width/1280)),ds=Math.max(11,Math.round(14*s.width/1280));ctx.font="bold "+ts+"px Arial";ctx.fillText("MANAGE Library",tx+10,y+pad+ts);ctx.font=ds+"px Arial";ctx.fillText(new Date().toLocaleDateString(undefined,{day:"2-digit",month:"long",year:"numeric"})+" | "+new Date().toLocaleTimeString(),tx+10,y+pad+ts+ds+5)
-}
-function saveCapturedCanvas(canvas,s){
- const now=new Date(),date=getDateKey(now),time=now.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit",second:"2-digit"});drawWatermark(canvas.getContext("2d"),canvas,s);
- canvas.toBlob(async blob=>{try{await savePhotoToDatabase(blob,date,time,now.getTime());await renderHistory();const u=URL.createObjectURL(blob);latestPhoto.src=u;latestPhoto.style.display="block";noPhoto.style.display="none";downloadLatest.href=u;downloadLatest.download="MANAGE-Library-"+date+"-"+time.replace(/:/g,"-")+".jpg";downloadLatest.style.display="inline-block";setStatus("📸 Clear visitor photograph saved.","success")}catch(e){setStatus("Photo could not be stored: "+e.message,"error")}}, "image/jpeg",s.quality)
+
+photoQuality.addEventListener(
+    "change",
+    updateQualityInfo
+);
+
+
+updateQualityInfo();
+
+
+
+/* =====================================================
+   COOLDOWN
+===================================================== */
+
+cooldown.addEventListener(
+    "input",
+    function() {
+
+        cooldownValue.textContent =
+            cooldown.value +
+            " sec";
+
+    }
+);
+
+
+
+/* =====================================================
+   STATUS
+===================================================== */
+
+function setStatus(
+    message,
+    type = ""
+) {
+
+    status.textContent =
+        message;
+
+
+    status.className =
+        "live-status";
+
+
+    if (type) {
+
+        status.classList.add(
+            type
+        );
+
+    }
+
 }
 
-document.getElementById("startButton").onclick=startCamera;document.getElementById("stopButton").onclick=stopCamera;setInterval(monitorCameraTrack,5000);
-async function initialize(){try{await openDatabase();await renderHistory()}catch(e){console.error(e);document.getElementById("historySummary").textContent="Database unavailable"}}
-initialize();window.addEventListener("beforeunload",stopCamera);
+
+
+/* =====================================================
+   PHOTO QUALITY
+===================================================== */
+
+function getPhotoQuality() {
+
+    const value =
+        photoQuality.value;
+
+
+    if (
+        value === "verylow"
+    ) {
+
+        return {
+
+            width: 320,
+
+            height: 180,
+
+            quality: 0.30
+
+        };
+
+    }
+
+
+    if (
+        value === "low"
+    ) {
+
+        return {
+
+            width: 480,
+
+            height: 270,
+
+            quality: 0.40
+
+        };
+
+    }
+
+
+    if (
+        value === "medium"
+    ) {
+
+        return {
+
+            width: 640,
+
+            height: 360,
+
+            quality: 0.50
+
+        };
+
+    }
+
+
+    return {
+
+        width: 1280,
+
+        height: 720,
+
+        quality: 0.70
+
+    };
+
+}
+
+
+
+/* =====================================================
+   START CAMERA
+===================================================== */
+
+async function startCamera() {
+
+    if (running) {
+
+        return;
+
+    }
+
+
+    try {
+
+        setStatus(
+            "Requesting camera permission..."
+        );
+
+
+        stream =
+            await navigator.mediaDevices
+                .getUserMedia({
+
+                    video: {
+
+                        width: {
+                            ideal: 1280
+                        },
+
+                        height: {
+                            ideal: 720
+                        }
+
+                    },
+
+                    audio: false
+
+                });
+
+
+        video.srcObject =
+            stream;
+
+
+        await video.play();
+
+
+        /*
+        Motion analysis resolution.
+        */
+
+        motionCanvas.width =
+            320;
+
+
+        motionCanvas.height =
+            180;
+
+
+        previousFrame =
+            null;
+
+
+        motionStarted =
+            false;
+
+
+        stableFrames =
+            0;
+
+
+        running =
+            true;
+
+
+        startButton.disabled =
+            true;
+
+
+        stopButton.disabled =
+            false;
+
+
+        cameraStatus.textContent =
+            "ON";
+
+
+        cameraStatusBox.textContent =
+            "🟢 Camera Online";
+
+
+        cameraStatusBox.className =
+            "camera-status-box online";
+
+
+        cameraBadge.textContent =
+            "● CAMERA LIVE";
+
+
+        cameraBadge.classList.add(
+            "live"
+        );
+
+
+        systemStatusText.textContent =
+            "Monitoring Active";
+
+
+        statusDot.classList.add(
+            "active"
+        );
+
+
+        setStatus(
+            "Camera active. Monitoring for movement...",
+            "success"
+        );
+
+
+        detectMotion();
+
+    }
+
+
+    catch(error) {
+
+        console.error(
+            error
+        );
+
+
+        setStatus(
+            "Camera error: " +
+            error.message,
+            "error"
+        );
+
+    }
+
+}
+
+
+
+/* =====================================================
+   STOP CAMERA
+===================================================== */
+
+function stopCamera() {
+
+    running =
+        false;
+
+
+    if (animationFrame) {
+
+        cancelAnimationFrame(
+            animationFrame
+        );
+
+
+        animationFrame =
+            null;
+
+    }
+
+
+    if (stream) {
+
+        stream
+            .getTracks()
+            .forEach(
+                track =>
+                    track.stop()
+            );
+
+    }
+
+
+    stream =
+        null;
+
+
+    video.srcObject =
+        null;
+
+
+    previousFrame =
+        null;
+
+
+    startButton.disabled =
+        false;
+
+
+    stopButton.disabled =
+        true;
+
+
+    cameraStatus.textContent =
+        "OFF";
+
+
+    cameraStatusBox.textContent =
+        "⚪ Camera Offline";
+
+
+    cameraStatusBox.className =
+        "camera-status-box offline";
+
+
+    cameraBadge.textContent =
+        "CAMERA OFF";
+
+
+    cameraBadge.classList.remove(
+        "live"
+    );
+
+
+    systemStatusText.textContent =
+        "Camera Off";
+
+
+    statusDot.classList.remove(
+        "active"
+    );
+
+
+    setStatus(
+        "Camera stopped."
+    );
+
+}
+
+
+
+/* =====================================================
+   MOTION DETECTION
+===================================================== */
+
+function detectMotion() {
+
+    if (!running) {
+
+        return;
+
+    }
+
+
+    /*
+    Current frame.
+    */
+
+    motionContext.drawImage(
+
+        video,
+
+        0,
+        0,
+
+        motionCanvas.width,
+        motionCanvas.height
+
+    );
+
+
+    const currentFrame =
+        motionContext.getImageData(
+
+            0,
+            0,
+
+            motionCanvas.width,
+            motionCanvas.height
+
+        );
+
+
+    /*
+    First frame.
+    */
+
+    if (!previousFrame) {
+
+        previousFrame =
+            currentFrame;
+
+
+        animationFrame =
+            requestAnimationFrame(
+                detectMotion
+            );
+
+
+        return;
+
+    }
+
+
+    const current =
+        currentFrame.data;
+
+
+    const previous =
+        previousFrame.data;
+
+
+    /*
+    IMPORTANT:
+    This is the same working
+    block-based detection approach.
+    */
+
+    let threshold;
+
+    let requiredBlocks;
+
+
+    if (
+        sensitivity.value ===
+        "high"
+    ) {
+
+        threshold = 12;
+
+        requiredBlocks = 8;
+
+    }
+
+    else if (
+        sensitivity.value ===
+        "medium"
+    ) {
+
+        threshold = 18;
+
+        requiredBlocks = 12;
+
+    }
+
+    else {
+
+        threshold = 25;
+
+        requiredBlocks = 18;
+
+    }
+
+
+    const blockWidth =
+        20;
+
+
+    const blockHeight =
+        20;
+
+
+    let changedBlocks =
+        0;
+
+
+    for (
+        let y = 0;
+        y < motionCanvas.height;
+        y += blockHeight
+    ) {
+
+
+        for (
+            let x = 0;
+            x < motionCanvas.width;
+            x += blockWidth
+        ) {
+
+
+            let currentBrightness =
+                0;
+
+
+            let previousBrightness =
+                0;
+
+
+            let pixels =
+                0;
+
+
+            for (
+                let by = y;
+                by <
+                    y + blockHeight &&
+                    by <
+                    motionCanvas.height;
+                by++
+            ) {
+
+
+                for (
+                    let bx = x;
+                    bx <
+                        x + blockWidth &&
+                        bx <
+                        motionCanvas.width;
+                    bx++
+                ) {
+
+
+                    const index =
+                        (
+                            by *
+                            motionCanvas.width +
+                            bx
+                        ) * 4;
+
+
+                    currentBrightness +=
+
+                        (
+                            current[index] +
+                            current[index + 1] +
+                            current[index + 2]
+                        ) / 3;
+
+
+                    previousBrightness +=
+
+                        (
+                            previous[index] +
+                            previous[index + 1] +
+                            previous[index + 2]
+                        ) / 3;
+
+
+                    pixels++;
+
+                }
+
+            }
+
+
+            if (pixels === 0) {
+
+                continue;
+
+            }
+
+
+            currentBrightness /=
+                pixels;
+
+
+            previousBrightness /=
+                pixels;
+
+
+            const difference =
+                Math.abs(
+
+                    currentBrightness -
+                    previousBrightness
+
+                );
+
+
+            if (
+                difference >=
+                threshold
+            ) {
+
+                changedBlocks++;
+
+            }
+
+        }
+
+    }
+
+
+    previousFrame =
+        currentFrame;
+
+
+    /*
+    Significant movement.
+    */
+
+    if (
+        changedBlocks >=
+        requiredBlocks
+    ) {
+
+
+        stableFrames++;
+
+
+        if (
+            stableFrames >= 2 &&
+            !motionStarted
+        ) {
+
+
+            motionStarted =
+                true;
+
+
+            motionCounter++;
+
+
+            document.getElementById(
+                "motionCount"
+            ).textContent =
+                motionCounter;
+
+
+            document.getElementById(
+                "leftMotionCount"
+            ).textContent =
+                motionCounter;
+
+
+            const now =
+                Date.now();
+
+
+            const cooldownMilliseconds =
+                Number(
+                    cooldown.value
+                ) * 1000;
+
+
+            if (
+                now -
+                lastCaptureTime >=
+                cooldownMilliseconds
+            ) {
+
+
+                setStatus(
+
+                    "🟢 MOVEMENT DETECTED — Capturing photo...",
+
+                    "motion"
+
+                );
+
+
+                capturePhoto();
+
+
+                lastCaptureTime =
+                    now;
+
+            }
+
+        }
+
+    }
+
+    else {
+
+
+        stableFrames =
+            0;
+
+
+        motionStarted =
+            false;
+
+
+        if (running) {
+
+            setStatus(
+
+                "Monitoring for movement...",
+
+                "success"
+
+            );
+
+        }
+
+    }
+
+
+    animationFrame =
+        requestAnimationFrame(
+            detectMotion
+        );
+
+}
+
+
+
+/* =====================================================
+   CAPTURE PHOTO + WATERMARK
+===================================================== */
+
+async function capturePhoto() {
+
+    if (
+        !video.videoWidth
+    ) {
+
+        return;
+
+    }
+
+
+    /*
+    Selected storage quality.
+    */
+
+    const settings =
+        getPhotoQuality();
+
+
+    const canvas =
+        document.createElement(
+            "canvas"
+        );
+
+
+    canvas.width =
+        settings.width;
+
+
+    canvas.height =
+        settings.height;
+
+
+    const context =
+        canvas.getContext(
+            "2d"
+        );
+
+
+    /*
+    Resize live camera frame.
+    */
+
+    context.drawImage(
+
+        video,
+
+        0,
+        0,
+
+        settings.width,
+        settings.height
+
+    );
+
+
+    /*
+    Capture date/time.
+    */
+
+    const now =
+        new Date();
+
+
+    const timestamp =
+        now.getTime();
+
+
+    const date =
+        getDateKey(
+            now
+        );
+
+
+    const time =
+        now.toLocaleTimeString(
+            undefined,
+            {
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit"
+            }
+        );
+
+
+    /*
+    =====================================================
+    WATERMARK
+    =====================================================
+
+    Every photo will permanently contain:
+
+    MANAGE Library
+    20 August 2026 | 10:32:15 AM
+
+    The size is automatically scaled
+    according to the photograph resolution.
+    */
+
+
+    const scale =
+        settings.width / 480;
+
+
+    const padding =
+        Math.max(
+            7,
+            Math.round(
+                9 * scale
+            )
+        );
+
+
+    const titleSize =
+        Math.max(
+            12,
+            Math.round(
+                17 * scale
+            )
+        );
+
+
+    const dateSize =
+        Math.max(
+            9,
+            Math.round(
+                12 * scale
+            )
+        );
+
+
+    const lineHeight =
+        titleSize +
+        dateSize +
+        9;
+
+
+    /*
+    Watermark background.
+    */
+
+    const watermarkWidth =
+        Math.min(
+            settings.width - 10,
+            Math.max(
+                215 * scale,
+                240
+            )
+        );
+
+
+    const watermarkHeight =
+        lineHeight +
+        padding * 2;
+
+
+    const watermarkY =
+        settings.height -
+        watermarkHeight -
+        padding;
+
+
+    /*
+    Dark semi-transparent background.
+    */
+
+    context.fillStyle =
+        "rgba(0,0,0,0.68)";
+
+
+    context.fillRect(
+
+        padding,
+
+        watermarkY,
+
+        watermarkWidth,
+
+        watermarkHeight
+
+    );
+
+
+    /*
+    Main title.
+    */
+
+    context.fillStyle =
+        "#ffffff";
+
+
+    context.font =
+        "bold " +
+        titleSize +
+        "px Arial";
+
+
+    context.fillText(
+
+        "MANAGE Library",
+
+        padding * 2,
+
+        watermarkY +
+        padding +
+        titleSize
+
+    );
+
+
+    /*
+    Date + time.
+    */
+
+    context.font =
+        dateSize +
+        "px Arial";
+
+
+    context.fillText(
+
+        now.toLocaleDateString(
+            undefined,
+            {
+                day: "2-digit",
+                month: "long",
+                year: "numeric"
+            }
+        ) +
+        " | " +
+        time,
+
+        padding * 2,
+
+        watermarkY +
+        padding +
+        titleSize +
+        dateSize +
+        3
+
+    );
+
+
+    /*
+    Convert to compressed JPEG.
+    */
+
+    canvas.toBlob(
+
+        async function(blob) {
+
+            if (!blob) {
+
+                return;
+
+            }
+
+
+            try {
+
+
+                /*
+                Save photo.
+                */
+
+                await savePhotoToDatabase(
+
+                    blob,
+
+                    date,
+
+                    time,
+
+                    timestamp
+
+                );
+
+
+                photoCounter++;
+
+
+                /*
+                Refresh history.
+                */
+
+                await renderHistory();
+
+
+                /*
+                Latest photo.
+                */
+
+                const imageURL =
+                    URL.createObjectURL(
+                        blob
+                    );
+
+
+                latestPhoto.src =
+                    imageURL;
+
+
+                latestPhoto.style.display =
+                    "block";
+
+
+                noPhoto.style.display =
+                    "none";
+
+
+                /*
+                Latest download.
+                */
+
+                downloadLatest.href =
+                    imageURL;
+
+
+                downloadLatest.download =
+
+                    "MANAGE-Library-" +
+
+                    date +
+
+                    "-" +
+
+                    time.replace(
+                        /:/g,
+                        "-"
+                    ) +
+
+                    ".jpg";
+
+
+                downloadLatest.style.display =
+                    "inline-block";
+
+
+                setStatus(
+
+                    "📸 Photo saved with MANAGE Library watermark.",
+
+                    "success"
+
+                );
+
+            }
+
+
+            catch(error) {
+
+                console.error(
+                    error
+                );
+
+
+                setStatus(
+
+                    "Photo captured but could not be stored: " +
+                    error.message,
+
+                    "error"
+
+                );
+
+            }
+
+        },
+
+        "image/jpeg",
+
+        settings.quality
+
+    );
+
+}
+
+
+
+/* =====================================================
+   INITIALIZATION
+===================================================== */
+
+async function initialize() {
+
+    try {
+
+        await openDatabase();
+
+        await renderHistory();
+
+    }
+
+    catch(error) {
+
+        console.error(
+            error
+        );
+
+
+        document.getElementById(
+            "historySummary"
+        ).textContent =
+            "Database unavailable";
+
+    }
+
+}
+
+
+initialize();
+
+
+
+/* =====================================================
+   BUTTON EVENTS
+===================================================== */
+
+startButton.addEventListener(
+    "click",
+    startCamera
+);
+
+
+stopButton.addEventListener(
+    "click",
+    stopCamera
+);
+
+
+document.getElementById(
+    "downloadAllButton"
+).addEventListener(
+    "click",
+    downloadAllPhotos
+);
+
+
+
+/* =====================================================
+   CLEANUP
+===================================================== */
+
+window.addEventListener(
+    "beforeunload",
+    stopCamera
+);
+
 </script>
+
 </body>
+
 </html>
