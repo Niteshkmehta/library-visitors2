@@ -511,6 +511,13 @@ async function captureBestFrame(){
  for(let i=0;i<5;i++){if(!running)break;const canvas=document.createElement("canvas");canvas.width=s.width;canvas.height=s.height;canvas.getContext("2d").drawImage(video,0,0,s.width,s.height);candidates.push({canvas,score:sharpness(canvas)});await new Promise(r=>setTimeout(r,60))}
  if(candidates.length){candidates.sort((a,b)=>b.score-a.score);saveCapturedCanvas(candidates[0].canvas,s)}
 }
+function setStatus(message, type = "") {
+ const statusElement = document.getElementById("status");
+ statusElement.textContent = message;
+ statusElement.className = "live-status";
+ if(type) statusElement.classList.add(type);
+}
+
 function sharpness(canvas){
  const w=160,h=90,t=document.createElement("canvas");t.width=w;t.height=h;const x=t.getContext("2d");x.drawImage(canvas,0,0,w,h);const d=x.getImageData(0,0,w,h).data;let s=0;
  for(let y=1;y<h;y+=2)for(let x1=1;x1<w;x1+=2){const i=(y*w+x1)*4,l=(d[i-4]+d[i-3]+d[i-2])/3,q=(d[i]+d[i+1]+d[i+2])/3,j=((y-1)*w+x1)*4,a=(d[j]+d[j+1]+d[j+2])/3;s+=Math.abs(q-l)+Math.abs(q-a)}return s
