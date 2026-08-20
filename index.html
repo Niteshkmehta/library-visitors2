@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MANAGE Library - Smart Visitors Entry System</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f3f6f9;color:#1f2937}
+.header{background:linear-gradient(135deg,#17365d,#245b8f);color:#fff;padding:18px 26px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.header-inner{max-width:1500px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:20px}.brand{display:flex;align-items:center;gap:15px}
+.brand-logo{width:62px;height:62px;background:#fff;border-radius:8px;object-fit:contain;padding:3px}.brand h1{margin:0;font-size:27px}.brand p{margin:5px 0 0;color:#dbeafe;font-size:14px}
+.system-status{display:flex;align-items:center;gap:9px;padding:10px 15px;border-radius:20px;background:rgba(255,255,255,.12);font-size:14px}.status-dot{width:10px;height:10px;border-radius:50%;background:#9ca3af}.status-dot.active{background:#22c55e;box-shadow:0 0 10px rgba(34,197,94,.8)}
+.container{max-width:1500px;margin:22px auto;padding:0 18px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.stat-card{background:#fff;border-radius:10px;padding:15px 18px;box-shadow:0 2px 7px rgba(0,0,0,.06);border-left:4px solid #245b8f}.stat-label{color:#6b7280;font-size:12px;text-transform:uppercase;letter-spacing:.5px}.stat-value{color:#17365d;font-size:25px;font-weight:bold;margin-top:4px}
+.main-grid{display:grid;grid-template-columns:minmax(480px,1.3fr) minmax(370px,1fr) 285px;gap:18px;align-items:start}.card{background:#fff;border-radius:11px;padding:17px;box-shadow:0 2px 9px rgba(0,0,0,.07)}
+.card-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}.card-title h2{margin:0;color:#17365d;font-size:17px}.left-panel{position:sticky;top:15px}
+.setting-group{border-bottom:1px solid #e5e7eb;padding-bottom:15px;margin-bottom:15px}.setting-group:last-child{border-bottom:0;margin-bottom:0;padding-bottom:0}.setting-heading{color:#374151;font-weight:bold;font-size:13px;margin-bottom:9px}
+.setting-label{display:block;color:#6b7280;font-size:12px;margin-bottom:5px}select{width:100%;padding:8px;border:1px solid #d1d5db;border-radius:6px;background:#fff;font-size:13px}input[type=range]{width:100%}.range-value{font-size:12px;color:#245b8f;font-weight:bold;float:right}
+.camera-status-box{padding:10px;border-radius:7px;background:#f3f4f6;font-size:13px;margin-bottom:10px}.camera-status-box.online{background:#dcfce7;color:#166534}.control-buttons{display:flex;flex-direction:column;gap:8px}
+button{border:0;border-radius:6px;padding:9px 11px;font-size:12px;cursor:pointer}button:disabled{opacity:.45;cursor:not-allowed}.btn-start{background:#16a34a;color:#fff}.btn-stop{background:#dc2626;color:#fff}.btn-blue{background:#2563eb;color:#fff}.btn-gray{background:#64748b;color:#fff}.btn-danger{background:#dc2626;color:#fff}
+.detection-status{padding:9px;background:#f8fafc;border-radius:6px;font-size:12px;color:#475569;line-height:1.5}
+.camera-container{background:#050505;border-radius:9px;overflow:hidden;position:relative;aspect-ratio:16/9;width:100%}video{width:100%;height:100%;display:block;object-fit:cover;background:#000}
+.camera-overlay{position:absolute;top:12px;left:12px;right:12px;display:flex;justify-content:space-between;pointer-events:none}.camera-badge{padding:6px 10px;border-radius:15px;background:rgba(0,0,0,.65);color:#fff;font-size:11px}.camera-badge.live{background:rgba(22,163,74,.9)}
+.visitor-alert{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:none;background:rgba(22,163,74,.92);color:#fff;padding:14px 20px;border-radius:10px;font-weight:bold;font-size:17px;box-shadow:0 4px 18px rgba(0,0,0,.35);text-align:center}
+.visitor-alert.show{display:block}.live-status{margin-top:10px;padding:10px 12px;border-radius:7px;background:#f3f4f6;color:#4b5563;font-size:13px}.live-status.success{background:#dcfce7;color:#166534}.live-status.motion{background:#fef3c7;color:#92400e;font-weight:bold}.live-status.error{background:#fee2e2;color:#991b1b}
+.history-card{max-height:800px;overflow-y:auto}.history-top{position:sticky;top:-17px;z-index:5;background:#fff;padding-bottom:13px;border-bottom:1px solid #e5e7eb;margin-bottom:8px}
+.history-top h2{margin:0 0 4px;color:#17365d;font-size:18px}.history-summary{color:#6b7280;font-size:12px;margin-bottom:10px}.history-controls{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:8px}
+.history-controls select,.history-controls button{min-width:0}.report-buttons{display:grid;grid-template-columns:1fr 1fr;gap:7px}.report-buttons button{font-size:11px}
+.day-section{border-bottom:1px solid #e5e7eb;padding:14px 0}.day-header{display:flex;align-items:center;justify-content:space-between;gap:7px;margin-bottom:10px}.day-title{color:#17365d;font-size:14px;font-weight:bold}.day-count{color:#6b7280;font-size:11px;margin-top:3px}.day-actions{display:flex;gap:5px}.download-day{background:#2563eb;color:#fff;padding:6px 8px;font-size:10px}.photo-item{display:flex;align-items:center;gap:8px;padding:6px;margin-bottom:5px;border-radius:6px;background:#f8fafc}.photo-item:hover{background:#eef2f7}
+.photo-thumb{width:67px;height:46px;object-fit:cover;border-radius:4px;cursor:pointer;background:#111}.photo-info{flex:1;min-width:0}.photo-time{font-size:12px;font-weight:bold;color:#374151}.photo-type{font-size:10px;color:#9ca3af;margin-top:2px}.photo-actions{display:flex;gap:4px}.photo-download{background:#64748b;color:#fff;padding:5px 7px;font-size:10px}.photo-delete{background:#dc2626;color:#fff;padding:5px 7px;font-size:10px}
+.empty-history{text-align:center;padding:40px 10px;color:#9ca3af;font-size:13px}.latest-card{margin-top:18px}.latest-image-container{background:#111827;border-radius:8px;min-height:100px;display:flex;align-items:center;justify-content:center;overflow:hidden}#latestPhoto{max-width:100%;display:none}.no-photo{color:#9ca3af;font-size:12px}
+.modal{display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.92);align-items:center;justify-content:center;padding:25px}.viewer{width:min(1200px,96vw);height:min(90vh,850px);display:grid;grid-template-columns:70px 1fr 70px;grid-template-rows:1fr auto;gap:12px;align-items:center}
+.viewer-image-area{grid-column:2;grid-row:1;height:100%;display:flex;align-items:center;justify-content:center;min-width:0;min-height:0}.modal img{max-width:100%;max-height:100%;object-fit:contain;border-radius:7px}.viewer-arrow{width:54px;height:54px;border-radius:50%;background:rgba(255,255,255,.16);color:#fff;font-size:30px;padding:0;display:flex;align-items:center;justify-content:center}.viewer-arrow:hover{background:rgba(255,255,255,.28)}
+.viewer-prev{grid-column:1;grid-row:1}.viewer-next{grid-column:3;grid-row:1}.viewer-info{grid-column:2;grid-row:2;text-align:center;color:#fff}.viewer-counter{font-size:13px;color:#d1d5db;margin-bottom:4px}.viewer-time{font-size:15px;font-weight:bold}.viewer-type{font-size:12px;color:#cbd5e1;margin-top:3px}.viewer-download{margin-top:9px;display:inline-block;background:#2563eb;color:#fff;text-decoration:none;padding:8px 14px;border-radius:6px;font-size:12px}.close-modal{position:absolute;right:25px;top:12px;color:#fff;font-size:36px;cursor:pointer;z-index:10}
+.report-modal{display:none;position:fixed;inset:0;z-index:1100;background:rgba(0,0,0,.65);align-items:center;justify-content:center;padding:20px}.report-box{background:#fff;width:min(900px,95vw);max-height:90vh;overflow:auto;border-radius:12px;padding:20px}.report-box h2{margin-top:0;color:#17365d}.report-actions{display:flex;gap:8px;justify-content:flex-end;margin-bottom:12px}.report-table{width:100%;border-collapse:collapse;font-size:12px}.report-table th,.report-table td{border:1px solid #d1d5db;padding:7px;text-align:left}.report-table th{background:#eef2f7;color:#17365d}.report-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}.report-summary div{background:#f8fafc;padding:10px;border-radius:6px}.report-summary strong{display:block;font-size:18px;color:#17365d}.footer{text-align:center;max-width:1500px;margin:20px auto;padding:12px;color:#9ca3af;font-size:11px}
+@media(max-width:1200px){.main-grid{grid-template-columns:minmax(400px,1.2fr) minmax(320px,1fr) 260px}}@media(max-width:1000px){.main-grid{grid-template-columns:1fr}.left-panel{position:static}.history-card{max-height:none}}@media(max-width:700px){.stats{grid-template-columns:repeat(2,1fr)}.header-inner{flex-direction:column;align-items:flex-start}.viewer{grid-template-columns:50px 1fr 50px;width:100%;height:85vh}.viewer-arrow{width:44px;height:44px;font-size:25px}.report-summary{grid-template-columns:repeat(2,1fr)}}@media(max-width:500px){.stats{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header class="header">
+<div class="header-inner">
+<div class="brand">
+<img class="brand-logo" src="https://upload.wikimedia.org/wikipedia/en/2/21/National_Institute_of_Agricultural_Extension_Management_logo.png" crossorigin="anonymous" alt="MANAGE Logo">
+<div><h1>MANAGE LIBRARY</h1><p>Smart Visitors Entry System</p></div>
+</div>
+<div class="system-status"><span id="statusDot" class="status-dot"></span><span id="systemStatusText">Camera Off</span></div>
+</div>
+</header>
+
+<div class="container">
+
+<div class="stats">
+<div class="stat-card"><div class="stat-label">Camera</div><div id="cameraStat" class="stat-value">OFF</div></div>
+<div class="stat-card"><div class="stat-label">Detected Records</div><div id="visitorCount" class="stat-value">0</div></div>
+<div class="stat-card"><div class="stat-label">Today's Visitors</div><div id="todayCount" class="stat-value">0</div></div>
+
+<div class="stat-card"><div class="stat-label">Storage Used</div><div id="storageStat" class="stat-value" style="font-size:19px">0 MB</div></div>
+</div>
+
+<div class="main-grid">
+
+<!-- LEFT: LIVE CAMERA -->
+<div class="card live-panel">
+<div class="card-title"><h2>🎥 Live Camera Feed</h2></div>
+<div class="camera-container">
+<video id="camera" autoplay playsinline muted></video>
+<div class="camera-overlay">
+<span id="cameraBadge" class="camera-badge">CAMERA OFF</span>
+<span class="camera-badge">VISITOR DETECTION</span>
+</div>
+<div id="visitorAlert" class="visitor-alert">👤 VISITOR DETECTED<br><small>Capturing clear photograph...</small></div>
+</div>
+<div id="status" class="live-status">Camera is stopped.</div>
+</div>
+
+<!-- MIDDLE: VISITOR HISTORY -->
+<div class="card history-card">
+<div class="history-top">
+<h2>👤 Detected Visitors</h2>
+<div id="historySummary" class="history-summary">Loading visitor records...</div>
+
+<div class="history-controls">
+<select id="dateFilter"><option value="all">All Dates</option></select>
+<select id="monthFilter"><option value="all">All Months</option></select>
+</div>
+
+<div class="report-buttons">
+<button id="dailyReportButton" class="btn-blue">📊 Daily Report</button>
+<button id="monthlyReportButton" class="btn-blue">📊 Monthly Report</button>
+</div>
+
+<br>
+<button id="downloadAllButton" class="btn-blue" style="width:100%;">⬇ Download All Visitor Records</button>
+</div>
+<div id="history"><div class="empty-history">No visitors detected yet.</div></div>
+</div>
+
+<!-- RIGHT: SETTINGS -->
+<div class="card left-panel">
+<div class="card-title"><h2>⚙ Settings</h2></div>
+
+<div class="setting-group">
+<div class="setting-heading">Camera</div>
+<div id="cameraStatusBox" class="camera-status-box">⚪ Camera Offline</div>
+<div class="control-buttons">
+<button id="startButton" class="btn-start">▶ Start Monitoring</button>
+<button id="stopButton" class="btn-stop" disabled>■ Stop Monitoring</button>
+</div>
+</div>
+
+<div class="setting-group">
+<div class="setting-heading">Visitor Detection</div>
+<label class="setting-label">Sensitivity</label>
+<select id="sensitivity"><option value="low">Low</option><option value="medium">Medium</option><option value="high" selected>High</option></select>
+<br><br>
+<label class="setting-label">Event Cooldown <span id="cooldownValue" class="range-value">5 sec</span></label>
+<input id="cooldown" type="range" min="2" max="60" value="5">
+<br><br>
+
+</div>
+
+<div class="setting-group">
+<div class="setting-heading">Photo Settings</div>
+<label class="setting-label">Capture Quality</label>
+<select id="photoQuality"><option value="medium">Medium — 640×360 / 50%</option><option value="high" selected>High — 1280×720 / 70%</option></select>
+<br><br><div id="qualityInfo" class="detection-status">1280 × 720 pixels<br>JPEG quality: 70%</div>
+</div>
+
+<div class="setting-group">
+<div class="setting-heading">Storage & Statistics</div>
+<div class="detection-status">
+<strong>Detected Records:</strong> <span id="leftVisitorCount">0</span><br><br>
+
+<strong>Today's Visitors:</strong> <span id="leftTodayCount">0</span><br><br>
+<strong>Storage Used:</strong> <span id="leftStorage">0 MB</span><br><br>
+<strong>Detection:</strong> Multi-frame<br><br>
+<strong>Capture:</strong> Best frame + MANAGE logo
+</div>
+</div>
+
+<div class="setting-group">
+<div class="setting-heading">Camera Recovery</div>
+<div class="detection-status">Automatic camera reconnection is enabled if the video stream stops unexpectedly.</div>
+</div>
+</div>
+
+</div>
+
+<div class="card latest-card">
+<div class="card-title"><h2>📸 Latest Visitor Capture</h2></div>
+<div class="latest-image-container"><img id="latestPhoto" alt="Latest visitor capture"><div id="noPhoto" class="no-photo">No visitor captured yet.</div></div>
+<div style="margin-top:10px;"><a id="downloadLatest" class="btn-blue" style="display:none;text-decoration:none;padding:8px 12px;border-radius:6px;font-size:12px;">⬇ Download Latest Photo</a></div>
+</div>
+</div>
+
+<!-- PHOTO VIEWER -->
+<div id="photoModal" class="modal">
+<span id="closeModal" class="close-modal">&times;</span>
+<div class="viewer">
+<button id="previousPhoto" class="viewer-arrow viewer-prev">‹</button>
+<div class="viewer-image-area"><img id="modalImage" alt="Visitor photograph"></div>
+<button id="nextPhoto" class="viewer-arrow viewer-next">›</button>
+<div class="viewer-info">
+<div id="viewerCounter" class="viewer-counter">1 / 1</div>
+<div id="viewerTime" class="viewer-time"></div>
+<div class="viewer-type">👤 Visitor detected</div>
+<a id="viewerDownload" class="viewer-download">⬇ Download Photo</a>
+</div>
+</div>
+</div>
+
+<!-- REPORT MODAL -->
+<div id="reportModal" class="report-modal">
+<div class="report-box">
+<div class="report-actions">
+<button id="downloadReportCSV" class="btn-blue">⬇ CSV</button>
+<button id="downloadReportPDF" class="btn-blue">⬇ Print / PDF</button>
+<button id="closeReport" class="btn-gray">Close</button>
+</div>
+<div id="reportContent"></div>
+</div>
+</div>
+
+<div class="footer"><strong>MANAGE LIBRARY</strong> &nbsp;|&nbsp; Smart Visitors Entry System &nbsp;|&nbsp; Visitor photographs stored locally in this browser</div>
+
+<script>
+const DB_NAME="manageLibraryVisitorsDB",DB_VERSION=1,STORE_NAME="photos";
+const LOGO_URL="https://upload.wikimedia.org/wikipedia/en/2/21/National_Institute_of_Agricultural_Extension_Management_logo.png";
+const REAL_LOGO_URL="https://upload.wikimedia.org/wikipedia/en/2/21/National_Institute_of_Agricultural_Extension_Management_logo.png";
+let db=null,viewerPhotos=[],viewerIndex=0,viewerObjectUrls=[],currentReport=null;
+
+function openDatabase(){return new Promise((resolve,reject)=>{const r=indexedDB.open(DB_NAME,DB_VERSION);r.onupgradeneeded=e=>{const d=e.target.result;if(!d.objectStoreNames.contains(STORE_NAME)){const s=d.createObjectStore(STORE_NAME,{keyPath:"id",autoIncrement:true});s.createIndex("date","date");s.createIndex("timestamp","timestamp")}};r.onsuccess=e=>{db=e.target.result;resolve(db)};r.onerror=()=>reject(r.error)})}
+function savePhotoToDatabase(blob,date,time,timestamp){return new Promise((resolve,reject)=>{const tx=db.transaction(STORE_NAME,"readwrite"),r=tx.objectStore(STORE_NAME).add({blob,date,time,timestamp,type:"Visitor detected"});r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})}
+function getAllPhotos(){return new Promise((resolve,reject)=>{const r=db.transaction(STORE_NAME,"readonly").objectStore(STORE_NAME).getAll();r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})}
+function deletePhoto(id){return new Promise((resolve,reject)=>{const r=db.transaction(STORE_NAME,"readwrite").objectStore(STORE_NAME).delete(id);r.onsuccess=()=>resolve();r.onerror=()=>reject(r.error)})}
+function getDateKey(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function displayDate(s){const p=s.split("-");return new Date(+p[0],+p[1]-1,+p[2]).toLocaleDateString(undefined,{day:"numeric",month:"long",year:"numeric"})}
+const ESTIMATION_FACTOR = 50;
+function estimateVisitors(n){return Math.round(n*(ESTIMATION_FACTOR/100))}
+function formatMB(bytes){return (bytes/1024/1024).toFixed(2)+" MB"}
+
+async function storageUsed(){
+ const photos=await getAllPhotos();let bytes=0;photos.forEach(p=>bytes+=p.blob?.size||0);return bytes
+}
+
+async function updateStats(){
+ const photos=await getAllPhotos(),today=getDateKey(new Date()),todayRecords=photos.filter(p=>p.date===today).length,estimated=estimateVisitors(todayRecords),allEstimated=estimateVisitors(photos.length),used=await storageUsed();
+ document.getElementById("visitorCount").textContent=photos.length;
+ document.getElementById("todayCount").textContent=estimated;
+ 
+ document.getElementById("storageStat").textContent=formatMB(used);
+ document.getElementById("leftVisitorCount").textContent=photos.length;
+ 
+ document.getElementById("leftTodayCount").textContent=estimated;
+ document.getElementById("leftStorage").textContent=formatMB(used);
+}
+
+function buildFilters(photos){
+ const dates=[...new Set(photos.map(p=>p.date))].sort((a,b)=>b.localeCompare(a));
+ const months=[...new Set(photos.map(p=>p.date.slice(0,7)))].sort((a,b)=>b.localeCompare(a));
+ const df=document.getElementById("dateFilter"),mf=document.getElementById("monthFilter"),oldD=df.value,oldM=mf.value;
+ df.innerHTML='<option value="all">All Dates</option>'+dates.map(d=>`<option value="${d}">${displayDate(d)}</option>`).join("");
+ mf.innerHTML='<option value="all">All Months</option>'+months.map(m=>`<option value="${m}">${new Date(+m.slice(0,4),+m.slice(5)-1,1).toLocaleDateString(undefined,{month:"long",year:"numeric"})}</option>`).join("");
+ if(dates.includes(oldD))df.value=oldD;if(months.includes(oldM))mf.value=oldM;
+}
+
+async function renderHistory(){
+ const all=await getAllPhotos();all.sort((a,b)=>b.timestamp-a.timestamp);buildFilters(all);
+ const date=document.getElementById("dateFilter").value,month=document.getElementById("monthFilter").value;
+ let photos=all;if(date!=="all")photos=photos.filter(p=>p.date===date);else if(month!=="all")photos=photos.filter(p=>p.date.startsWith(month));
+ document.getElementById("historySummary").textContent=photos.length+" detected record"+(photos.length===1?"":"s");
+ const history=document.getElementById("history");history.innerHTML="";
+ if(!photos.length){history.innerHTML='<div class="empty-history">No visitor records for this selection.</div>';await updateStats();return}
+ const grouped={};photos.forEach(p=>(grouped[p.date]??=[]).push(p));
+ Object.keys(grouped).sort((a,b)=>b.localeCompare(a)).forEach(d=>{
+  const section=document.createElement("div");section.className="day-section";
+  const header=document.createElement("div");header.className="day-header";
+  const title=document.createElement("div");title.innerHTML=`<div class="day-title">📅 ${displayDate(d)}</div><div class="day-count">${grouped[d].length} records</div>`;
+  const actions=document.createElement("div");actions.className="day-actions";
+  const dbtn=document.createElement("button");dbtn.className="download-day";dbtn.textContent="⬇ Day ZIP";dbtn.onclick=()=>downloadDay(d,grouped[d],dbtn);
+  actions.appendChild(dbtn);header.append(title,actions);section.appendChild(header);
+  grouped[d].forEach(photo=>{
+   const item=document.createElement("div");item.className="photo-item";
+   const img=document.createElement("img");img.className="photo-thumb";img.src=URL.createObjectURL(photo.blob);
+   img.onclick=async()=>{const a=await getAllPhotos();a.sort((x,y)=>y.timestamp-x.timestamp);openViewer(a,a.findIndex(x=>x.id===photo.id))};
+   const info=document.createElement("div");info.className="photo-info";info.innerHTML=`<div class="photo-time">${photo.time}</div><div class="photo-type">Visitor detected</div>`;
+   const acts=document.createElement("div");acts.className="photo-actions";
+   const dl=document.createElement("button");dl.className="photo-download";dl.textContent="⬇";dl.title="Download";dl.onclick=e=>{e.stopPropagation();downloadPhoto(photo)};
+   const del=document.createElement("button");del.className="photo-delete";del.textContent="✕";del.title="Delete incorrect record";del.onclick=e=>{e.stopPropagation();confirmDelete(photo)};
+   acts.append(dl,del);item.append(img,info,acts);section.appendChild(item);
+  });history.appendChild(section);
+ });
+ await updateStats();
+}
+
+async function confirmDelete(photo){
+ if(!confirm("Delete this visitor record?\n\nThe photograph will be permanently removed from this browser and daily/monthly statistics will be recalculated."))return;
+ await deletePhoto(photo.id);await renderHistory();
+ if(viewerPhotos.some(p=>p.id===photo.id))closeViewer();
+}
+
+function openViewer(photos,index){viewerPhotos=[...photos].sort((a,b)=>b.timestamp-a.timestamp);viewerIndex=Math.max(0,Math.min(index,viewerPhotos.length-1));viewerObjectUrls.forEach(URL.revokeObjectURL);viewerObjectUrls=viewerPhotos.map(p=>URL.createObjectURL(p.blob));document.getElementById("photoModal").style.display="flex";updateViewer()}
+function updateViewer(){if(!viewerPhotos.length)return;const p=viewerPhotos[viewerIndex];document.getElementById("modalImage").src=viewerObjectUrls[viewerIndex];document.getElementById("viewerCounter").textContent=(viewerIndex+1)+" / "+viewerPhotos.length;document.getElementById("viewerTime").textContent=displayDate(p.date)+" | "+p.time;const a=document.getElementById("viewerDownload");a.href=viewerObjectUrls[viewerIndex];a.download="MANAGE-Library-"+p.date+"-"+p.time.replace(/:/g,"-")+".jpg";document.getElementById("previousPhoto").disabled=viewerIndex===0;document.getElementById("nextPhoto").disabled=viewerIndex===viewerPhotos.length-1}
+function closeViewer(){document.getElementById("photoModal").style.display="none";viewerObjectUrls.forEach(URL.revokeObjectURL);viewerObjectUrls=[];viewerPhotos=[]}
+document.getElementById("previousPhoto").onclick=()=>{if(viewerIndex>0){viewerIndex--;updateViewer()}};document.getElementById("nextPhoto").onclick=()=>{if(viewerIndex<viewerPhotos.length-1){viewerIndex++;updateViewer()}};document.getElementById("closeModal").onclick=closeViewer;
+document.getElementById("photoModal").onclick=e=>{if(e.target.id==="photoModal")closeViewer()};document.addEventListener("keydown",e=>{if(document.getElementById("photoModal").style.display!=="flex")return;if(e.key==="ArrowLeft"&&viewerIndex>0){viewerIndex--;updateViewer()}if(e.key==="ArrowRight"&&viewerIndex<viewerPhotos.length-1){viewerIndex++;updateViewer()}if(e.key==="Escape")closeViewer()});
+function downloadPhoto(p){const u=URL.createObjectURL(p.blob),a=document.createElement("a");a.href=u;a.download="MANAGE-Library-"+p.date+"-"+p.time.replace(/:/g,"-")+".jpg";a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
+
+async function downloadDay(date,photos,button){
+ button.disabled=true;button.textContent="Creating...";
+ try{const z=new JSZip(),f=z.folder("MANAGE-Library-"+date);photos.forEach((p,i)=>f.file(String(i+1).padStart(3,"0")+"-"+p.time.replace(/:/g,"-")+".jpg",p.blob));const c=await z.generateAsync({type:"blob",compression:"DEFLATE"}),u=URL.createObjectURL(c),a=document.createElement("a");a.href=u;a.download="MANAGE-Library-"+date+".zip";a.click();setTimeout(()=>URL.revokeObjectURL(u),2000)}finally{button.disabled=false;button.textContent="⬇ Day ZIP"}
+}
+async function downloadAllPhotos(){
+ const photos=await getAllPhotos();if(!photos.length){alert("There are no visitor records to download.");return}const b=document.getElementById("downloadAllButton");b.disabled=true;b.textContent="Creating ZIP...";
+ try{const z=new JSZip(),g={};photos.forEach(p=>(g[p.date]??=[]).push(p));Object.keys(g).forEach(d=>{const f=z.folder(d);g[d].forEach((p,i)=>f.file(String(i+1).padStart(3,"0")+"-"+p.time.replace(/:/g,"-")+".jpg",p.blob))});const c=await z.generateAsync({type:"blob",compression:"DEFLATE"}),u=URL.createObjectURL(c),a=document.createElement("a");a.href=u;a.download="MANAGE-Library-All-Visitor-Records.zip";a.click();setTimeout(()=>URL.revokeObjectURL(u),2000)}finally{b.disabled=false;b.textContent="⬇ Download All Visitor Records"}
+}
+
+function csvEscape(v){return '"'+String(v).replace(/"/g,'""')+'"'}
+function makeDailyReport(photos,date){
+ const rows=photos.filter(p=>p.date===date).sort((a,b)=>a.timestamp-b.timestamp),est=estimateVisitors(rows.length);
+ return {title:"Daily Visitor Report",subtitle:displayDate(date),rows,est,detected:rows.length};
+}
+function makeMonthlyReport(photos,month){
+ const rows=photos.filter(p=>p.date.startsWith(month)).sort((a,b)=>a.timestamp-b.timestamp),byDay={};rows.forEach(p=>(byDay[p.date]??=[]).push(p));
+ let busiest="",max=0;Object.entries(byDay).forEach(([d,a])=>{if(a.length>max){max=a.length;busiest=d}});
+ return {title:"Monthly Visitor Report",subtitle:new Date(+month.slice(0,4),+month.slice(5)-1,1).toLocaleDateString(undefined,{month:"long",year:"numeric"}),rows,est:estimateVisitors(rows.length),detected:rows.length,byDay,busiest};
+}
+
+function showReport(report){
+ currentReport=report;document.getElementById("reportModal").style.display="flex";
+ const activeDays=report.byDay?Object.keys(report.byDay).length:(report.detected?1:0),avg=activeDays?(report.est/activeDays).toFixed(1):"0";
+ let html=`<h2>MANAGE LIBRARY</h2><h3>${report.title}</h3><p><strong>${report.subtitle}</strong></p><div class="report-summary"><div>Detected Records<strong>${report.detected}</strong></div><div>Estimated Visitors<strong>${report.est}</strong></div><div>Active Days<strong>${activeDays}</strong></div><div>Avg./Active Day<strong>${avg}</strong></div></div>`;
+ if(report.busiest)html+=`<p><strong>Busiest Day:</strong> ${displayDate(report.busiest)} (${report.byDay[report.busiest].length} records; estimated ${estimateVisitors(report.byDay[report.busiest].length)} visitors)</p>`;
+ if(report.byDay){
+  html+='<table class="report-table"><tr><th>Date</th><th>Detected Records</th><th>Estimated Visitors</th></tr>';
+  Object.keys(report.byDay).sort().forEach(d=>html+=`<tr><td>${displayDate(d)}</td><td>${report.byDay[d].length}</td><td>${estimateVisitors(report.byDay[d].length)}</td></tr>`);
+  html+='</table><br>';
+ }
+ html+='<h3>Detailed Records</h3><table class="report-table"><tr><th>S. No.</th><th>Date</th><th>Time</th><th>Record</th></tr>';
+ report.rows.forEach((p,i)=>html+=`<tr><td>${i+1}</td><td>${p.date}</td><td>${p.time}</td><td>Visitor detected</td></tr>`);
+ html+=`</table>`;
+ document.getElementById("reportContent").innerHTML=html;
+}
+function downloadReportCSV(){
+ if(!currentReport)return;
+ let csv="MANAGE LIBRARY - "+currentReport.title+"\n"+currentReport.subtitle+"\n\nDetected Records,"+currentReport.detected+"\nEstimated Visitors,"+currentReport.est+"\n\nS. No.,Date,Time,Record\n";
+ currentReport.rows.forEach((p,i)=>csv+=`${i+1},${csvEscape(p.date)},${csvEscape(p.time)},${csvEscape("Visitor detected")}\n`);
+ const blob=new Blob([csv],{type:"text/csv;charset=utf-8"}),u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download="MANAGE-Library-"+currentReport.title.replaceAll(" ","-")+"-"+currentReport.subtitle.replaceAll(" ","-")+".csv";a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)
+}
+function printReport(){window.print()}
+document.getElementById("downloadReportCSV").onclick=downloadReportCSV;document.getElementById("downloadReportPDF").onclick=printReport;document.getElementById("closeReport").onclick=()=>document.getElementById("reportModal").style.display="none";
+
+document.getElementById("dailyReportButton").onclick=async()=>{
+ const all=await getAllPhotos(),date=document.getElementById("dateFilter").value!=="all"?document.getElementById("dateFilter").value:getDateKey(new Date());
+ showReport(makeDailyReport(all,date));
+};
+document.getElementById("monthlyReportButton").onclick=async()=>{
+ const all=await getAllPhotos(),month=document.getElementById("monthFilter").value!=="all"?document.getElementById("monthFilter").value:getDateKey(new Date()).slice(0,7);
+ showReport(makeMonthlyReport(all,month));
+};
+document.getElementById("dateFilter").onchange=renderHistory;document.getElementById("monthFilter").onchange=renderHistory;document.getElementById("downloadAllButton").onclick=downloadAllPhotos;
+
+const video=document.getElementById("camera"),startButton=document.getElementById("startButton"),stopButton=document.getElementById("stopButton"),status=document.getElementById("status"),cameraStat=document.getElementById("cameraStat"),cameraBadge=document.getElementById("cameraBadge"),systemStatusText=document.getElementById("systemStatusText"),statusDot=document.getElementById("statusDot"),cameraStatusBox=document.getElementById("cameraStatusBox"),sensitivity=document.getElementById("sensitivity"),photoQuality=document.getElementById("photoQuality"),qualityInfo=document.getElementById("qualityInfo"),cooldown=document.getElementById("cooldown"),cooldownValue=document.getElementById("cooldownValue"),latestPhoto=document.getElementById("latestPhoto"),noPhoto=document.getElementById("noPhoto"),downloadLatest=document.getElementById("downloadLatest"),visitorAlert=document.getElementById("visitorAlert");
+let stream=null,running=false,animationFrame=null,previousFrame=null,visitorCount=0,lastCaptureTime=0,motionConfirmed=false,motionFrames=0,noMotionFrames=0,reconnectTimer=null;
+const motionCanvas=document.createElement("canvas"),motionContext=motionCanvas.getContext("2d",{willReadFrequently:true});
+function getPhotoQuality(){return photoQuality.value==="medium"?{width:640,height:360,quality:.50}:{width:1280,height:720,quality:.70}}
+function updateQualityInfo(){const s=getPhotoQuality();qualityInfo.innerHTML=s.width+" × "+s.height+" pixels<br>JPEG quality: "+Math.round(s.quality*100)+"%"}
+photoQuality.onchange=updateQualityInfo;updateQualityInfo();cooldown.oninput=()=>cooldownValue.textContent=cooldown.value+" sec";
+
+
+async function startCamera(){
+ if(running)return;
+ try{
+  if(!navigator.mediaDevices?.getUserMedia)throw new Error("This browser does not support camera access.");
+  setStatus("Requesting camera permission...");
+  stream=await navigator.mediaDevices.getUserMedia({video:{width:{ideal:1920},height:{ideal:1080},facingMode:"user"},audio:false});
+  video.srcObject=stream;await video.play();motionCanvas.width=480;motionCanvas.height=270;previousFrame=null;motionConfirmed=false;motionFrames=0;noMotionFrames=0;running=true;
+  startButton.disabled=true;stopButton.disabled=false;cameraStat.textContent="ON";cameraStatusBox.textContent="🟢 Camera Online";cameraStatusBox.className="camera-status-box online";cameraBadge.textContent="● CAMERA LIVE";cameraBadge.classList.add("live");systemStatusText.textContent="Monitoring Active";statusDot.classList.add("active");setStatus("Camera active. Monitoring for visitors...","success");detectMotion();
+ }catch(e){console.error(e);setStatus("Camera error: "+e.message,"error")}
+}
+function stopCamera(){
+ running=false;if(animationFrame)cancelAnimationFrame(animationFrame);animationFrame=null;if(reconnectTimer)clearTimeout(reconnectTimer);
+ if(stream)stream.getTracks().forEach(t=>t.stop());stream=null;video.srcObject=null;previousFrame=null;startButton.disabled=false;stopButton.disabled=true;cameraStat.textContent="OFF";cameraStatusBox.textContent="⚪ Camera Offline";cameraStatusBox.className="camera-status-box";cameraBadge.textContent="CAMERA OFF";cameraBadge.classList.remove("live");systemStatusText.textContent="Camera Off";statusDot.classList.remove("active");setStatus("Camera stopped.")
+}
+function scheduleReconnect(){if(!running)return;setStatus("🔴 Camera stream stopped. Reconnecting...","error");if(reconnectTimer)return;reconnectTimer=setTimeout(async()=>{reconnectTimer=null;if(running){running=false;if(stream)stream.getTracks().forEach(t=>t.stop());stream=null;try{await startCamera()}catch(e){scheduleReconnect()}}},3000)}
+video.onended=()=>scheduleReconnect();video.onerror=()=>scheduleReconnect();
+
+function detectMotion(){
+ if(!running)return;if(video.readyState<2){animationFrame=requestAnimationFrame(detectMotion);return}
+ motionContext.drawImage(video,0,0,480,270);const currentFrame=motionContext.getImageData(0,0,480,270);if(!previousFrame){previousFrame=currentFrame;animationFrame=requestAnimationFrame(detectMotion);return}
+ const c=currentFrame.data,p=previousFrame.data;let threshold,requiredBlocks;
+ if(sensitivity.value==="high"){threshold=10;requiredBlocks=5}else if(sensitivity.value==="medium"){threshold=15;requiredBlocks=8}else{threshold=21;requiredBlocks=12}
+ let changed=0;
+ for(let y=0;y<270;y+=20)for(let x=0;x<480;x+=20){let cb=0,pb=0,n=0;for(let yy=y;yy<y+20&&yy<270;yy++)for(let xx=x;xx<x+20&&xx<480;xx++){const i=(yy*480+xx)*4;cb+=(c[i]+c[i+1]+c[i+2])/3;pb+=(p[i]+p[i+1]+p[i+2])/3;n++}if(n&&Math.abs(cb/n-pb/n)>=threshold)changed++}
+ previousFrame=currentFrame;
+ if(changed>=requiredBlocks){motionFrames++;noMotionFrames=0;if(motionFrames>=3&&!motionConfirmed){motionConfirmed=true;const now=Date.now();if(now-lastCaptureTime>=Number(cooldown.value)*1000){visitorAlert.classList.add("show");setStatus("👤 Visitor detected — selecting clear frame...","motion");captureBestFrame();lastCaptureTime=now;setTimeout(()=>visitorAlert.classList.remove("show"),1800)}}}
+ else{noMotionFrames++;motionFrames=0;if(noMotionFrames>=8)motionConfirmed=false;if(running)setStatus("Monitoring for visitors...","success")}
+ animationFrame=requestAnimationFrame(detectMotion)
+}
+
+async function captureBestFrame(){
+ if(!video.videoWidth)return;const s=getPhotoQuality(),candidates=[];
+ for(let i=0;i<5;i++){if(!running)break;const canvas=document.createElement("canvas");canvas.width=s.width;canvas.height=s.height;canvas.getContext("2d").drawImage(video,0,0,s.width,s.height);candidates.push({canvas,score:sharpness(canvas)});await new Promise(r=>setTimeout(r,60))}
+ if(candidates.length){candidates.sort((a,b)=>b.score-a.score);saveCapturedCanvas(candidates[0].canvas,s)}
+}
+function sharpness(canvas){
+ const w=160,h=90,t=document.createElement("canvas");t.width=w;t.height=h;const x=t.getContext("2d");x.drawImage(canvas,0,0,w,h);const d=x.getImageData(0,0,w,h).data;let s=0;
+ for(let y=1;y<h;y+=2)for(let x1=1;x1<w;x1+=2){const i=(y*w+x1)*4,l=(d[i-4]+d[i-3]+d[i-2])/3,q=(d[i]+d[i+1]+d[i+2])/3,j=((y-1)*w+x1)*4,a=(d[j]+d[j+1]+d[j+2])/3;s+=Math.abs(q-l)+Math.abs(q-a)}return s
+}
+
+const logoImage=new Image();logoImage.crossOrigin="anonymous";logoImage.src=REAL_LOGO_URL;
+function drawWatermark(ctx,canvas,s){
+ const pad=Math.max(10,Math.round(12*s.width/1280)),boxH=Math.max(65,Math.round(80*s.height/720)),logoW=Math.min(140,Math.round(150*s.width/1280)),ratio=(logoImage.naturalWidth||263)/(logoImage.naturalHeight||219),logoH=logoW/ratio;
+ const y=canvas.height-boxH-pad,x=pad,boxW=logoW+pad*2;ctx.fillStyle="rgba(255,255,255,.93)";ctx.fillRect(x,y,boxW,boxH);
+ if(logoImage.complete&&logoImage.naturalWidth)ctx.drawImage(logoImage,x+pad,y+(boxH-logoH)/2,logoW,logoH);
+ const tx=x+boxW+10,tw=Math.min(canvas.width-tx-pad,canvas.width*.55);ctx.fillStyle="rgba(0,0,0,.72)";ctx.fillRect(tx,y,tw,boxH);ctx.fillStyle="#fff";
+ const ts=Math.max(15,Math.round(20*s.width/1280)),ds=Math.max(11,Math.round(14*s.width/1280));ctx.font="bold "+ts+"px Arial";ctx.fillText("MANAGE Library",tx+10,y+pad+ts);ctx.font=ds+"px Arial";ctx.fillText(new Date().toLocaleDateString(undefined,{day:"2-digit",month:"long",year:"numeric"})+" | "+new Date().toLocaleTimeString(),tx+10,y+pad+ts+ds+5)
+}
+function saveCapturedCanvas(canvas,s){
+ const now=new Date(),date=getDateKey(now),time=now.toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit",second:"2-digit"});drawWatermark(canvas.getContext("2d"),canvas,s);
+ canvas.toBlob(async blob=>{try{await savePhotoToDatabase(blob,date,time,now.getTime());await renderHistory();const u=URL.createObjectURL(blob);latestPhoto.src=u;latestPhoto.style.display="block";noPhoto.style.display="none";downloadLatest.href=u;downloadLatest.download="MANAGE-Library-"+date+"-"+time.replace(/:/g,"-")+".jpg";downloadLatest.style.display="inline-block";setStatus("📸 Clear visitor photograph saved.","success")}catch(e){setStatus("Photo could not be stored: "+e.message,"error")}}, "image/jpeg",s.quality)
+}
+
+document.getElementById("startButton").onclick=startCamera;document.getElementById("stopButton").onclick=stopCamera;
+async function initialize(){try{await openDatabase();await renderHistory()}catch(e){console.error(e);document.getElementById("historySummary").textContent="Database unavailable"}}
+initialize();window.addEventListener("beforeunload",stopCamera);
+</script>
+</body>
+</html>
