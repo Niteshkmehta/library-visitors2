@@ -331,30 +331,135 @@ photoQuality.onchange=updateQualityInfo;updateQualityInfo();cooldown.oninput=()=
 
 
 async function startCamera(){
- if(running)return;
+ if(running) return;
+
+ setStatus("Starting camera...");
+
  try{
-  if(!navigator.mediaDevices?.getUserMedia)throw new Error("This browser does not support camera access.");
-  setStatus("Requesting camera permission...");
+  if(!window.isSecureContext){
+   throw new Error("Camera access requires HTTPS. Open the GitHub Pages HTTPS address.");
+  }
+
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+   throw new Error("Camera API is unavailable in this browser.");
+  }
+
+  // First request the camera with the simplest possible constraint.
+  // This avoids compatibility problems caused by resolution/facingMode settings.
+  let newStream;
   try{
-   stream=await navigator.mediaDevices.getUserMedia({
-    video:{width:{ideal:1280},height:{ideal:720},facingMode:"user"},
-    audio:false
+   newStream = await navigator.mediaDevices.getUserMedia({
+    video: true,
+    audio: false
    });
   }catch(firstError){
-   console.warn("Preferred camera settings failed; trying basic camera:",firstError);
-   stream=await navigator.mediaDevices.getUserMedia({video:true,audio:false});
+   console.error("Basic camera request failed:", firstError);
+
+   // Second attempt with explicit environment/user facing modes.
+   newStream = await navigator.mediaDevices.getUserMedia({
+    video: {
+     width: {ideal: 1280},
+     height: {ideal: 720}
+    },
+    audio: false
+   });
   }
-  video.srcObject=stream;await video.play();motionCanvas.width=480;motionCanvas.height=270;previousFrame=null;motionConfirmed=false;motionFrames=0;noMotionFrames=0;running=true;
-  startButton.disabled=true;stopButton.disabled=false;cameraStat.textContent="ON";cameraStatusBox.textContent="🟢 Camera Online";cameraStatusBox.className="camera-status-box online";cameraBadge.textContent="● CAMERA LIVE";cameraBadge.classList.add("live");systemStatusText.textContent="Monitoring Active";statusDot.classList.add("active");setStatus("Camera active. Monitoring for visitors...","success");detectMotion();
+
+  stream = newStream;
+
+  // Attach the stream first, then wait for video metadata.
+  video.srcObject = stream;
+
+  await new Promise((resolve,reject)=>{
+   const timeout=setTimeout(()=>reject(new Error("Camera opened but video did not start within 10 seconds.")),10000);
+
+   if(video.readyState >= 2){
+    clearTimeout(timeout);
+    resolve();
+    return;
+   }
+
+   video.onloadedmetadata=()=>{
+    clearTimeout(timeout);
+    resolve();
+   };
+
+   video.onerror=()=>{
+    clearTimeout(timeout);
+    reject(new Error("The browser could not display the camera stream."));
+   };
+  });
+
+  await video.play();
+
+  // Camera is now genuinely running.
+  running=true;
+  motionCanvas.width=480;
+  motionCanvas.height=270;
+  previousFrame=null;
+  motionConfirmed=false;
+  motionFrames=0;
+  noMotionFrames=0;
+
+  startButton.disabled=true;
+  stopButton.disabled=false;
+
+  cameraStat.textContent="ON";
+  cameraStatusBox.textContent="🟢 Camera Online";
+  cameraStatusBox.className="camera-status-box online";
+
+  cameraBadge.textContent="● CAMERA LIVE";
+  cameraBadge.classList.add("live");
+
+  systemStatusText.textContent="Monitoring Active";
+  statusDot.classList.add("active");
+
+  setStatus("Camera active. Monitoring for visitors...","success");
+
+  // Some browsers report the stream as live a little later.
+  stream.getVideoTracks().forEach(track=>{
+   track.onended=()=>scheduleReconnect();
+   track.onmute=()=>setStatus("Camera temporarily paused...","motion");
+   track.onunmute=()=>setStatus("Camera active. Monitoring for visitors...","success");
+  });
+
+  detectMotion();
+
  }catch(e){
-  console.error(e);
-  let msg="Camera error: "+e.message;
-  if(e.name==="NotAllowedError")msg="Camera permission was denied. Allow camera access for this site and try again.";
-  else if(e.name==="NotFoundError")msg="No camera was found. Check that the webcam is connected.";
-  else if(e.name==="NotReadableError")msg="The camera is already being used by another application. Close other camera apps and try again.";
-  else if(e.name==="SecurityError")msg="Camera access requires a secure connection such as HTTPS or localhost.";
-  setStatus(msg,"error");
-}
+  console.error("CAMERA START ERROR:",e);
+
+  if(stream){
+   stream.getTracks().forEach(track=>track.stop());
+   stream=null;
+  }
+
+  video.srcObject=null;
+  running=false;
+
+  startButton.disabled=false;
+  stopButton.disabled=true;
+  cameraStat.textContent="OFF";
+  cameraStatusBox.textContent="⚪ Camera Offline";
+  cameraStatusBox.className="camera-status-box";
+  cameraBadge.textContent="CAMERA OFF";
+  cameraBadge.classList.remove("live");
+  systemStatusText.textContent="Camera Off";
+  statusDot.classList.remove("active");
+
+  let message="Camera could not start: "+e.message;
+
+  if(e.name==="NotAllowedError"){
+   message="🔒 Camera permission denied. Click the camera icon in the browser address bar and allow Camera, then reload the page.";
+  }else if(e.name==="NotFoundError"){
+   message="📷 No camera found. Check that the webcam is connected.";
+  }else if(e.name==="NotReadableError"){
+   message="📷 Camera is being used by another application. Close Teams, Zoom, Camera app, WhatsApp, etc., then try again.";
+  }else if(e.name==="SecurityError"){
+   message="🔒 Camera access was blocked by browser security. Use the HTTPS GitHub Pages address.";
+  }
+
+  setStatus(message,"error");
+ }
 }
 function stopCamera(){
  running=false;if(animationFrame)cancelAnimationFrame(animationFrame);animationFrame=null;if(reconnectTimer)clearTimeout(reconnectTimer);
@@ -379,7 +484,6 @@ function scheduleReconnect(){
  },3000);
 }
 video.onended=()=>scheduleReconnect();
-video.onerror=()=>scheduleReconnect();
 
 function monitorCameraTrack(){
  if(!stream || !running)return;
@@ -425,7 +529,7 @@ function saveCapturedCanvas(canvas,s){
  canvas.toBlob(async blob=>{try{await savePhotoToDatabase(blob,date,time,now.getTime());await renderHistory();const u=URL.createObjectURL(blob);latestPhoto.src=u;latestPhoto.style.display="block";noPhoto.style.display="none";downloadLatest.href=u;downloadLatest.download="MANAGE-Library-"+date+"-"+time.replace(/:/g,"-")+".jpg";downloadLatest.style.display="inline-block";setStatus("📸 Clear visitor photograph saved.","success")}catch(e){setStatus("Photo could not be stored: "+e.message,"error")}}, "image/jpeg",s.quality)
 }
 
-document.getElementById("startButton").onclick=startCamera;document.getElementById("stopButton").onclick=stopCamera;setInterval(monitorCameraTrack,2000);
+document.getElementById("startButton").onclick=startCamera;document.getElementById("stopButton").onclick=stopCamera;setInterval(monitorCameraTrack,5000);
 async function initialize(){try{await openDatabase();await renderHistory()}catch(e){console.error(e);document.getElementById("historySummary").textContent="Database unavailable"}}
 initialize();window.addEventListener("beforeunload",stopCamera);
 </script>
